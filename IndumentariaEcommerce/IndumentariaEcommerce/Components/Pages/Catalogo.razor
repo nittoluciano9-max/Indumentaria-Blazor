@@ -26,7 +26,10 @@ else if (resultado.Items.Count == 0)
 }
 else
 {
-    <p class="text-muted">@resultado.TotalItems productos encontrados.</p>
+    <p class="text-muted">
+        @resultado.TotalItems productos encontrados ·
+        página @resultado.PaginaActual de @resultado.TotalPaginas
+    </p>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
         @foreach (var producto in resultado.Items)
@@ -39,6 +42,10 @@ else
             </div>
         }
     </div>
+
+    <Paginacion PaginaActual="resultado.PaginaActual"
+                TotalPaginas="resultado.TotalPaginas"
+                OnCambioPagina="IrAPaginaAsync" />
 }
 
 @code {
@@ -46,6 +53,7 @@ else
     private ResultadoPaginado<Producto>? resultado;
 
     private FiltrosCatalogo filtros = FiltrosCatalogo.Vacio;
+    private int pagina = 1;
 
     protected override Task OnInitializedAsync() => CargarAsync();
 
@@ -55,6 +63,19 @@ else
     private Task AplicarFiltrosAsync(FiltrosCatalogo nuevosFiltros)
     {
         filtros = nuevosFiltros;
+
+        // Volver a la primera página es obligatorio: si el usuario estaba en la
+        // página 3 y filtra por una categoría con 5 productos (una sola página),
+        // sin este reset la consulta pediría los items 25 a 36 de un conjunto
+        // de 5 y la grilla saldría vacía.
+        pagina = 1;
+
+        return CargarAsync();
+    }
+
+    private Task IrAPaginaAsync(int nuevaPagina)
+    {
+        pagina = nuevaPagina;
         return CargarAsync();
     }
 
@@ -63,6 +84,7 @@ else
         resultado = await ProductoService.BuscarAsync(
             filtros.Genero,
             filtros.CategoriaId,
-            filtros.Texto);
+            filtros.Texto,
+            pagina);
     }
 }

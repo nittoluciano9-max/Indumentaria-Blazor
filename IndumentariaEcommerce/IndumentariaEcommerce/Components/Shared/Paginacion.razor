@@ -1,0 +1,93 @@
+@* Componente de presentación: no consulta ni guarda nada. Recibe la página
+   actual y el total, dibuja los botones y avisa cuál eligió el usuario.
+   Al no saber qué está paginando, sirve igual para el catálogo y para el
+   panel de administración. *@
+
+@if (TotalPaginas > 1)
+{
+    <nav aria-label="Paginación de resultados" class="mt-4">
+        <ul class="pagination justify-content-center mb-0">
+
+            <li class="page-item @(HayAnterior ? "" : "disabled")">
+                <button type="button"
+                        class="page-link"
+                        disabled="@(!HayAnterior)"
+                        @onclick="() => IrAAsync(PaginaActual - 1)">
+                    Anterior
+                </button>
+            </li>
+
+            @foreach (var numero in PaginasVisibles())
+            {
+                var esActual = numero == PaginaActual;
+
+                <li class="page-item @(esActual ? "active" : "")" @key="numero">
+                    <button type="button"
+                            class="page-link"
+                            aria-current="@(esActual ? "page" : null)"
+                            @onclick="() => IrAAsync(numero)">
+                        @numero
+                    </button>
+                </li>
+            }
+
+            <li class="page-item @(HaySiguiente ? "" : "disabled")">
+                <button type="button"
+                        class="page-link"
+                        disabled="@(!HaySiguiente)"
+                        @onclick="() => IrAAsync(PaginaActual + 1)">
+                    Siguiente
+                </button>
+            </li>
+
+        </ul>
+    </nav>
+}
+
+@code {
+    /// <summary>Cuántos botones numerados se muestran como máximo.</summary>
+    private const int CantidadDeBotones = 5;
+
+    [Parameter, EditorRequired]
+    public int PaginaActual { get; set; }
+
+    [Parameter, EditorRequired]
+    public int TotalPaginas { get; set; }
+
+    /// <summary>Avisa qué página pidió el usuario. El componente no navega
+    /// ni consulta: de eso se encarga quien lo usa.</summary>
+    [Parameter, EditorRequired]
+    public EventCallback<int> OnCambioPagina { get; set; }
+
+    private bool HayAnterior => PaginaActual > 1;
+
+    private bool HaySiguiente => PaginaActual < TotalPaginas;
+
+    /// <summary>
+    /// Ventana deslizante de números alrededor de la página actual, para no
+    /// dibujar cuarenta botones cuando hay cuarenta páginas.
+    /// </summary>
+    private IEnumerable<int> PaginasVisibles()
+    {
+        var mitad = CantidadDeBotones / 2;
+
+        var desde = Math.Max(1, PaginaActual - mitad);
+        var hasta = Math.Min(TotalPaginas, desde + CantidadDeBotones - 1);
+
+        // Reajuste hacia atrás: al llegar a las últimas páginas, "hasta" toca
+        // el tope y sin esta línea quedarían menos botones de los previstos.
+        desde = Math.Max(1, hasta - CantidadDeBotones + 1);
+
+        return Enumerable.Range(desde, hasta - desde + 1);
+    }
+
+    private Task IrAAsync(int pagina)
+    {
+        if (pagina < 1 || pagina > TotalPaginas || pagina == PaginaActual)
+        {
+            return Task.CompletedTask;
+        }
+
+        return OnCambioPagina.InvokeAsync(pagina);
+    }
+}

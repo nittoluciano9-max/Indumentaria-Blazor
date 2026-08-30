@@ -18,12 +18,8 @@ public record ResultadoPaginado<T>(
     int PaginaActual,
     int TamanioPagina)
 {
-    // Los cálculos de paginación viven acá y no en el componente: así
-    // Paginacion.razor solamente lee valores en lugar de hacer cuentas.
+    // El cálculo vive acá y no en el componente: así Paginacion.razor
+    // solamente lee un valor en lugar de hacer la cuenta.
     public int TotalPaginas =>
         TamanioPagina <= 0 ? 0 : (int)Math.Ceiling(TotalItems / (double)TamanioPagina);
-
-    public bool HayAnterior => PaginaActual > 1;
-
-    public bool HaySiguiente => PaginaActual < TotalPaginas;
 }
