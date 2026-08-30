@@ -480,3 +480,8 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Base de datos SQLite del proyecto (se regenera con las migraciones de EF Core)
+*.db
+*.db-shm
+*.db-wal
