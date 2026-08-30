@@ -1,0 +1,72 @@
+@page "/catalogo"
+@inject ProductoService ProductoService
+
+<PageTitle>Catálogo - Indumentaria</PageTitle>
+
+<h1 class="mb-4">Catálogo</h1>
+
+@if (resultado is null)
+{
+    <!-- Blazor dibuja el componente ANTES de que OnInitializedAsync termine,
+         así que en el primer render "resultado" todavía es null. -->
+    <div class="d-flex align-items-center gap-2 text-muted">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Cargando productos...</span>
+    </div>
+}
+else if (resultado.Items.Count == 0)
+{
+    <div class="alert alert-info">No se encontraron productos.</div>
+}
+else
+{
+    <p class="text-muted">@resultado.TotalItems productos encontrados.</p>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        @foreach (var producto in resultado.Items)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <img src="@producto.ImagenUrl"
+                         class="card-img-top"
+                         alt="@producto.Nombre" />
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@producto.Nombre</h5>
+
+                        @* La navegación Categoria es nullable, por eso el ?.
+                           Acá está cargada porque el servicio hace Include,
+                           pero el compilador no puede saberlo. *@
+                        <p class="card-text text-muted small mb-2">
+                            @producto.Categoria?.Nombre · @producto.Genero
+                        </p>
+
+                        <p class="card-text fw-bold fs-5 mt-auto mb-0">
+                            @producto.Precio.ToString("C0")
+                        </p>
+
+                        @if (producto.Stock == 0)
+                        {
+                            <span class="badge text-bg-secondary mt-2 align-self-start">
+                                Sin stock
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    // Nullable a propósito: null significa "todavía no llegó la consulta".
+    private ResultadoPaginado<Producto>? resultado;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Acceder a la base acá está bien. Lo que NO se puede hacer en este
+        // método es llamar a JavaScript: durante el prerender todavía no hay
+        // navegador conectado (eso va en OnAfterRenderAsync).
+        resultado = await ProductoService.BuscarAsync();
+    }
+}

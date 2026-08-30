@@ -2,8 +2,15 @@ using IndumentariaEcommerce.Components;
 using IndumentariaEcommerce.Data;
 using IndumentariaEcommerce.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Cultura es-AR: sin esto los precios se formatean con la cultura del
+// servidor y se muestran como 24,900 en lugar de 24.900.
+var cultura = new CultureInfo("es-AR");
+CultureInfo.DefaultThreadCurrentCulture = cultura;
+CultureInfo.DefaultThreadCurrentUICulture = cultura;
 
 // ---------- Servicios ----------
 // Todo lo que se registre acá tiene que ir antes de builder.Build().
