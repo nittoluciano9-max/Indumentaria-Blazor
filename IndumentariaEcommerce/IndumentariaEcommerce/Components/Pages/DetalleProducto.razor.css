@@ -1,0 +1,13 @@
+/* Misma relación de aspecto que la tarjeta del catálogo, para que la foto no
+   cambie de proporción al pasar de la grilla al detalle. */
+.contenedor-imagen {
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.contenedor-imagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

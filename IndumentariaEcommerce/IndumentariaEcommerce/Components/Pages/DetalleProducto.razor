@@ -1,0 +1,135 @@
+@* Ficha de un producto. El :int de la ruta es una restricción: /producto/abc
+   no matchea y devuelve 404 en lugar de fallar al convertir el valor. *@
+@page "/producto/{Id:int}"
+@inject ProductoService ProductoService
+
+<PageTitle>@(producto?.Nombre ?? "Producto") - Indumentaria</PageTitle>
+
+@if (cargando)
+{
+    <div class="d-flex align-items-center gap-2 text-muted">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Cargando producto...</span>
+    </div>
+}
+else if (producto is null)
+{
+    @* Este caso es distinto de "cargando": el Id no existe en la base.
+       Por eso hace falta el flag, si no habría un spinner infinito. *@
+    <div class="alert alert-warning">
+        <h4 class="alert-heading">Producto no encontrado</h4>
+        <p class="mb-0">El producto que buscás no existe o fue dado de baja.</p>
+    </div>
+    <a href="/catalogo" class="btn btn-primary">Volver al catálogo</a>
+}
+else
+{
+    <nav aria-label="Ubicación" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="/catalogo">Catálogo</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@producto.Nombre</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+
+        <div class="col-12 col-md-6">
+            <div class="contenedor-imagen border rounded">
+                <img src="@producto.ImagenUrl"
+                     alt="@producto.Nombre"
+                     onerror="this.onerror=null; this.src='/imagenes/sin-imagen.svg';" />
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <p class="text-muted mb-1">@producto.Categoria?.Nombre · @producto.Genero</p>
+
+            <h1 class="h2">@producto.Nombre</h1>
+
+            <p class="fs-3 fw-bold">@producto.Precio.ToString("C0")</p>
+
+            <p>@producto.Descripcion</p>
+
+            @if (producto.Stock == 0)
+            {
+                <div class="alert alert-secondary">Este producto no tiene stock disponible.</div>
+            }
+            else
+            {
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Talle</label>
+
+                    @* Los talles se guardan como "S,M,L,XL" en una sola columna,
+                       así que hay que separarlos acá. Es el costo de haber
+                       evitado una tabla de talles. *@
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var talle in talles)
+                        {
+                            <button type="button"
+                                    class="btn @(talle == talleSeleccionado ? "btn-dark" : "btn-outline-dark")"
+                                    @key="talle"
+                                    @onclick="() => talleSeleccionado = talle">
+                                @talle
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @if (producto.Stock <= 10)
+                {
+                    <p class="text-warning-emphasis small">
+                        Quedan @producto.Stock unidades.
+                    </p>
+                }
+
+                @* Sin @onclick todavía: el CarritoService se agrega en el paso
+                   siguiente y ahí se conecta este botón. *@
+                <button type="button"
+                        class="btn btn-primary btn-lg w-100"
+                        disabled="@(talleSeleccionado is null)">
+                    Agregar al carrito
+                </button>
+
+                @if (talleSeleccionado is null)
+                {
+                    <p class="text-muted small mt-2 mb-0">Elegí un talle para continuar.</p>
+                }
+            }
+        </div>
+
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Producto? producto;
+    private string[] talles = [];
+    private string? talleSeleccionado;
+
+    // null en "producto" significa dos cosas distintas: todavía no llegó la
+    // consulta, o el Id no existe. Este flag las separa.
+    private bool cargando = true;
+
+    /// <summary>
+    /// Va acá y no en OnInitializedAsync: al navegar de /producto/1 a
+    /// /producto/2 Blazor reutiliza la misma instancia del componente porque
+    /// la plantilla de ruta es la misma. OnInitializedAsync corre una sola vez
+    /// en la vida del componente, así que seguiríamos mostrando el producto
+    /// anterior. OnParametersSetAsync corre cada vez que cambia el Id.
+    /// </summary>
+    protected override async Task OnParametersSetAsync()
+    {
+        cargando = true;
+        talleSeleccionado = null;
+
+        producto = await ProductoService.ObtenerPorIdAsync(Id);
+
+        talles = producto?.Talles.Split(
+            ',',
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+
+        cargando = false;
+    }
+}
