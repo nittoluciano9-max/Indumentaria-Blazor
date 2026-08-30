@@ -25,34 +25,12 @@ else
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
         @foreach (var producto in resultado.Items)
         {
-            <div class="col">
-                <div class="card h-100">
-                    <img src="@producto.ImagenUrl"
-                         class="card-img-top"
-                         alt="@producto.Nombre" />
-
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">@producto.Nombre</h5>
-
-                        @* La navegación Categoria es nullable, por eso el ?.
-                           Acá está cargada porque el servicio hace Include,
-                           pero el compilador no puede saberlo. *@
-                        <p class="card-text text-muted small mb-2">
-                            @producto.Categoria?.Nombre · @producto.Genero
-                        </p>
-
-                        <p class="card-text fw-bold fs-5 mt-auto mb-0">
-                            @producto.Precio.ToString("C0")
-                        </p>
-
-                        @if (producto.Stock == 0)
-                        {
-                            <span class="badge text-bg-secondary mt-2 align-self-start">
-                                Sin stock
-                            </span>
-                        }
-                    </div>
-                </div>
+            @* @key identifica cada elemento por su Id. Sin esto Blazor compara
+               la lista por posición al re-renderizar, y cuando el filtro cambie
+               los resultados podría reutilizar el nodo de un producto para
+               mostrar otro. *@
+            <div class="col" @key="producto.Id">
+                <TarjetaProducto Producto="producto" />
             </div>
         }
     </div>

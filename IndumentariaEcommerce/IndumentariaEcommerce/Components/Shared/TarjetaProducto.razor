@@ -1,0 +1,50 @@
+@* Tarjeta de un producto en la grilla del catálogo.
+   No tiene @page: no es una ruta, se usa dentro de otros componentes. *@
+
+<div class="card h-100 tarjeta">
+    <a href="/producto/@Producto.Id" class="text-decoration-none text-reset d-flex flex-column h-100">
+
+        <div class="contenedor-imagen">
+            @* onerror es HTML puro, no hace falta JS Interop.
+               El "this.onerror=null" va primero y es imprescindible: si el
+               placeholder tampoco cargara, el evento se dispararía a sí mismo
+               en un bucle infinito. *@
+            <img src="@Producto.ImagenUrl"
+                 alt="@Producto.Nombre"
+                 loading="lazy"
+                 onerror="this.onerror=null; this.src='/imagenes/sin-imagen.svg';" />
+        </div>
+
+        <div class="card-body d-flex flex-column">
+            <p class="text-muted small mb-1">
+                @Producto.Categoria?.Nombre · @Producto.Genero
+            </p>
+
+            <h5 class="card-title titulo">@Producto.Nombre</h5>
+
+            <p class="fw-bold fs-5 mt-auto mb-0">
+                @Producto.Precio.ToString("C0")
+            </p>
+
+            @if (Producto.Stock == 0)
+            {
+                <span class="badge text-bg-secondary mt-2 align-self-start">Sin stock</span>
+            }
+            else if (Producto.Stock <= 10)
+            {
+                <span class="badge text-bg-warning mt-2 align-self-start">
+                    Últimas @Producto.Stock unidades
+                </span>
+            }
+        </div>
+    </a>
+</div>
+
+@code {
+    /// <summary>
+    /// Producto a mostrar. EditorRequired hace que el compilador avise si el
+    /// componente padre se olvida de pasarlo, en lugar de fallar en runtime.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public Producto Producto { get; set; } = default!;
+}

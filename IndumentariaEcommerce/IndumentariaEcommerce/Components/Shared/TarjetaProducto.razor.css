@@ -1,0 +1,40 @@
+/* CSS Isolation: en el build, .NET agrega un atributo único a cada elemento
+   de este componente (por ejemplo b-x7k2p9) y reescribe estos selectores para
+   incluirlo. Por eso un nombre genérico como .tarjeta no pisa estilos de
+   ningún otro componente. */
+
+.tarjeta {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tarjeta:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Relación de aspecto fija. Sin esto, imágenes de distinto alto dejarían las
+   tarjetas de la grilla desalineadas entre sí. */
+.contenedor-imagen {
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.contenedor-imagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Recorta el nombre a dos líneas: uno largo empujaría el precio hacia abajo y
+   las tarjetas quedarían de distinta altura. El min-height reserva el espacio
+   de las dos líneas aunque el nombre ocupe una sola. */
+.titulo {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.6em;
+    font-size: 1rem;
+}
