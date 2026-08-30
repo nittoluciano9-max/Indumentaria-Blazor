@@ -31,6 +31,12 @@ builder.Services.AddDbContextFactory<AppDbContext>(opciones =>
 // propio, pero si mañana lo hiciera, Singleton lo compartiría entre usuarios.
 builder.Services.AddScoped<ProductoService>();
 
+// Estado del carrito. Scoped en Blazor Server significa una instancia por
+// circuito, o sea por pestaña conectada: cada usuario su carrito.
+// Con Singleton todos los usuarios del sitio compartirían el mismo carrito,
+// que es el error clásico de este patrón.
+builder.Services.AddScoped<CarritoService>();
+
 var app = builder.Build();
 
 // Crea la base si no existe y aplica las migraciones pendientes al arrancar.
