@@ -1,0 +1,106 @@
+@* Filtros del catálogo: búsqueda por nombre, género y categoría.
+   No consulta productos: solo avisa al componente padre qué eligió el usuario
+   a través del EventCallback OnCambio. *@
+
+@inject ProductoService ProductoService
+@implements IDisposable
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-6">
+        <label class="form-label small text-muted mb-1" for="buscador">Buscar</label>
+        @* @bind:event="oninput" actualiza la variable en cada tecla y
+           @bind:after dispara el debounce. Con el "onchange" por defecto
+           habría que salir del campo para que buscara. *@
+        <input id="buscador"
+               type="search"
+               class="form-control"
+               placeholder="Nombre del producto"
+               @bind="texto"
+               @bind:event="oninput"
+               @bind:after="BuscarConEsperaAsync" />
+    </div>
+
+    <div class="col-6 col-md-3">
+        <label class="form-label small text-muted mb-1" for="genero">Género</label>
+        <select id="genero" class="form-select" @bind="genero" @bind:after="NotificarAsync">
+            <option value="">Todos</option>
+            @foreach (var valor in Enum.GetValues<Genero>())
+            {
+                <option value="@valor">@valor</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <label class="form-label small text-muted mb-1" for="categoria">Categoría</label>
+        <select id="categoria" class="form-select" @bind="categoriaId" @bind:after="NotificarAsync">
+            <option value="">Todas</option>
+            @foreach (var categoria in categorias)
+            {
+                <option value="@categoria.Id">@categoria.Nombre</option>
+            }
+        </select>
+    </div>
+
+</div>
+
+@code {
+    /// <summary>Milisegundos que se espera sin tipear antes de buscar.</summary>
+    private const int EsperaBusqueda = 400;
+
+    /// <summary>
+    /// Se invoca cada vez que el usuario cambia algún filtro. El componente no
+    /// sabe quién lo escucha: solamente avisa.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public EventCallback<FiltrosCatalogo> OnCambio { get; set; }
+
+    private List<Categoria> categorias = new();
+    private Genero? genero;
+    private int? categoriaId;
+    private string? texto;
+
+    private CancellationTokenSource? ctsBusqueda;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // El filtro se trae sus propias categorías: así el padre no necesita
+        // saber nada sobre ellas.
+        categorias = await ProductoService.ObtenerCategoriasAsync();
+    }
+
+    private Task NotificarAsync()
+        => OnCambio.InvokeAsync(new FiltrosCatalogo(genero, categoriaId, texto));
+
+    /// <summary>
+    /// Debounce: espera a que el usuario deje de tipear antes de avisar.
+    /// Cada tecla cancela la espera de la tecla anterior, así escribir
+    /// "campera" produce una sola consulta en lugar de siete.
+    /// </summary>
+    private async Task BuscarConEsperaAsync()
+    {
+        ctsBusqueda?.Cancel();
+        ctsBusqueda = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(EsperaBusqueda, ctsBusqueda.Token);
+            await NotificarAsync();
+        }
+        catch (OperationCanceledException)
+        {
+            // Llegó otra tecla antes de cumplirse la espera: esta búsqueda
+            // se descarta y sigue viva únicamente la última.
+        }
+    }
+
+    public void Dispose()
+    {
+        // Si el usuario navega a otra página con una búsqueda en vuelo, hay
+        // que cancelarla para no dejar trabajo pendiente sobre un componente
+        // que ya no existe.
+        ctsBusqueda?.Cancel();
+        ctsBusqueda?.Dispose();
+    }
+}

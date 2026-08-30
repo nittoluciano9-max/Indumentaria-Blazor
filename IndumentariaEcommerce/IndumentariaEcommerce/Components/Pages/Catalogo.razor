@@ -5,6 +5,10 @@
 
 <h1 class="mb-4">Catálogo</h1>
 
+@* El catálogo no sabe cómo está hecho el filtro por dentro: solo recibe un
+   FiltrosCatalogo cada vez que el usuario cambia algo. *@
+<FiltroProductos OnCambio="AplicarFiltrosAsync" />
+
 @if (resultado is null)
 {
     <!-- Blazor dibuja el componente ANTES de que OnInitializedAsync termine,
@@ -16,7 +20,9 @@
 }
 else if (resultado.Items.Count == 0)
 {
-    <div class="alert alert-info">No se encontraron productos.</div>
+    <div class="alert alert-info">
+        No se encontraron productos con los filtros seleccionados.
+    </div>
 }
 else
 {
@@ -26,9 +32,8 @@ else
         @foreach (var producto in resultado.Items)
         {
             @* @key identifica cada elemento por su Id. Sin esto Blazor compara
-               la lista por posición al re-renderizar, y cuando el filtro cambie
-               los resultados podría reutilizar el nodo de un producto para
-               mostrar otro. *@
+               la lista por posición al re-renderizar, y al cambiar el filtro
+               podría reutilizar el nodo de un producto para mostrar otro. *@
             <div class="col" @key="producto.Id">
                 <TarjetaProducto Producto="producto" />
             </div>
@@ -40,11 +45,24 @@ else
     // Nullable a propósito: null significa "todavía no llegó la consulta".
     private ResultadoPaginado<Producto>? resultado;
 
-    protected override async Task OnInitializedAsync()
+    private FiltrosCatalogo filtros = FiltrosCatalogo.Vacio;
+
+    protected override Task OnInitializedAsync() => CargarAsync();
+
+    /// <summary>
+    /// Corre cuando FiltroProductos avisa que el usuario cambió algo.
+    /// </summary>
+    private Task AplicarFiltrosAsync(FiltrosCatalogo nuevosFiltros)
     {
-        // Acceder a la base acá está bien. Lo que NO se puede hacer en este
-        // método es llamar a JavaScript: durante el prerender todavía no hay
-        // navegador conectado (eso va en OnAfterRenderAsync).
-        resultado = await ProductoService.BuscarAsync();
+        filtros = nuevosFiltros;
+        return CargarAsync();
+    }
+
+    private async Task CargarAsync()
+    {
+        resultado = await ProductoService.BuscarAsync(
+            filtros.Genero,
+            filtros.CategoriaId,
+            filtros.Texto);
     }
 }
