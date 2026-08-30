@@ -1,5 +1,6 @@
 using IndumentariaEcommerce.Components;
 using IndumentariaEcommerce.Data;
+using IndumentariaEcommerce.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,10 @@ builder.Services.AddRazorComponents()
 // para cada consulta.
 builder.Services.AddDbContextFactory<AppDbContext>(opciones =>
     opciones.UseSqlite(builder.Configuration.GetConnectionString("ConexionSqlite")));
+
+// Consultas del catálogo. Scoped es el default seguro: hoy no guarda estado
+// propio, pero si mañana lo hiciera, Singleton lo compartiría entre usuarios.
+builder.Services.AddScoped<ProductoService>();
 
 var app = builder.Build();
 
