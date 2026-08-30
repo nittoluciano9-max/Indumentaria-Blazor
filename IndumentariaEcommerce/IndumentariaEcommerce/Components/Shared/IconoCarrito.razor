@@ -1,0 +1,53 @@
+@* Acceso al carrito con la cantidad de items. Se suscribe al CarritoService
+   para redibujarse cuando el carrito cambia desde cualquier otra pantalla. *@
+
+@inject CarritoService Carrito
+@implements IDisposable
+
+<NavLink class="nav-link" href="carrito">
+    <span class="bi bi-cart-nav-menu" aria-hidden="true"></span>
+    Carrito
+    @if (Carrito.CantidadTotal > 0)
+    {
+        <span class="badge rounded-pill text-bg-danger ms-auto me-3 contador">
+            @Carrito.CantidadTotal
+        </span>
+    }
+</NavLink>
+
+@code {
+    protected override void OnInitialized()
+    {
+        // El servicio expone un event Action de C#, no un EventCallback: por
+        // eso hay que suscribirse a mano, y por eso hay que desuscribirse.
+        Carrito.OnCambio += AlCambiarElCarrito;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool primerRender)
+    {
+        if (primerRender)
+        {
+            // Único momento en que existe el navegador: durante el prerender
+            // no hay JavaScript y leer localStorage tiraría excepción.
+            // Este componente vive en el menú, así que está en todas las
+            // páginas y el carrito se rehidrata sin importar por dónde entre
+            // el usuario.
+            await Carrito.InicializarAsync();
+        }
+    }
+
+    /// <summary>
+    /// InvokeAsync y no StateHasChanged a secas: el evento lo dispara otro
+    /// componente, o sea que llega fuera del contexto de sincronización del
+    /// render de Blazor. InvokeAsync devuelve la ejecución al hilo correcto.
+    /// </summary>
+    private void AlCambiarElCarrito() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        // Sin esto el servicio, que vive todo el circuito, quedaría con una
+        // referencia fuerte a un componente ya destruido: el recolector no
+        // podría liberarlo y el handler seguiría ejecutándose.
+        Carrito.OnCambio -= AlCambiarElCarrito;
+    }
+}
