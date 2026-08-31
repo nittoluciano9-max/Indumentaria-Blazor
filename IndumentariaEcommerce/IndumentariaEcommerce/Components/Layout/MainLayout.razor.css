@@ -4,12 +4,23 @@
     flex-direction: column;
 }
 
+/* Columna de contenido: article se estira para que el pie quede abajo
+   incluso en páginas cortas, en lugar de flotar a media pantalla. */
 main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+article {
     flex: 1;
 }
 
+/* Negro plano en lugar del degradado azul y violeta de la plantilla. */
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background-color: var(--negro);
+    border-right: 1px solid var(--negro-linea);
 }
 
 @media (min-width: 641px) {
@@ -29,6 +40,83 @@ main {
         padding-right: 1.5rem !important;
     }
 }
+
+/* ---------------- Pie ---------------- */
+
+.pie {
+    background-color: var(--negro);
+    color: var(--negro-texto);
+    padding: 3.5rem 1.5rem 1.75rem;
+}
+
+@media (min-width: 641px) {
+    .pie {
+        padding-inline: 2rem;
+    }
+}
+
+.pie-contenido {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2.5rem 4rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--negro-linea);
+}
+
+.pie-logo {
+    font-family: var(--fuente-titulo);
+    font-size: 1.9rem;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #FFFFFF;
+    margin: 0 0 0.5rem;
+}
+
+.pie-bajada {
+    margin: 0;
+    max-width: 28ch;
+    font-size: 0.92rem;
+}
+
+.pie-titulo {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    margin: 0 0 0.9rem;
+}
+
+.pie-nav {
+    display: grid;
+    gap: 0.55rem;
+}
+
+/* app.css pinta los links de naranja; en el pie no corresponde. */
+.pie-nav a {
+    width: fit-content;
+    color: var(--negro-texto);
+    font-size: 0.92rem;
+    text-decoration: none;
+}
+
+.pie-nav a:hover {
+    color: var(--acento);
+}
+
+.pie-legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.4rem 2rem;
+    padding-top: 1.5rem;
+    font-size: 0.78rem;
+    color: #7B7B85;
+}
+
+/* ---------------- Error de Blazor ---------------- */
 
 #blazor-error-ui {
     color-scheme: light only;

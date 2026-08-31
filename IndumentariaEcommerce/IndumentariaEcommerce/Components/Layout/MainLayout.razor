@@ -9,6 +9,29 @@
         <article class="content px-4">
             @Body
         </article>
+
+        @* Solo se enlazan rutas que existen. Nada de secciones inventadas. *@
+        <footer class="pie">
+            <div class="pie-contenido">
+                <div>
+                    <p class="pie-logo">Indumentaria</p>
+                    <p class="pie-bajada">Ropa urbana para todos los días.</p>
+                </div>
+
+                <nav class="pie-nav" aria-label="Enlaces del pie">
+                    <p class="pie-titulo">Navegación</p>
+                    <a href="/">Inicio</a>
+                    <a href="catalogo">Catálogo</a>
+                    <a href="carrito">Carrito</a>
+                    <a href="admin/productos">Administración</a>
+                </nav>
+            </div>
+
+            <div class="pie-legal">
+                <span>© @DateTime.Now.Year Indumentaria</span>
+                <span>Proyecto integrador · Blazor Server · .NET 9</span>
+            </div>
+        </footer>
     </main>
 </div>
 
