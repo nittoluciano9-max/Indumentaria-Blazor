@@ -111,6 +111,25 @@ public class ProductoService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Productos para la portada. El modelo no tiene un campo "destacado" y
+    /// agregarlo pediría otra migración, así que se toman los de mayor precio
+    /// con stock disponible: es una selección arbitraria, pero estable,
+    /// explicable y que nunca muestra algo que no se puede comprar.
+    /// </summary>
+    public async Task<List<Producto>> ObtenerDestacadosAsync(int cantidad = 4)
+    {
+        await using var contexto = await _fabrica.CreateDbContextAsync();
+
+        return await contexto.Productos
+            .AsNoTracking()
+            .Include(p => p.Categoria)
+            .Where(p => p.Stock > 0)
+            .OrderByDescending(p => p.Precio)
+            .Take(cantidad)
+            .ToListAsync();
+    }
+
     // ---------- Escritura (panel de administración) ----------
 
     /// <summary>
