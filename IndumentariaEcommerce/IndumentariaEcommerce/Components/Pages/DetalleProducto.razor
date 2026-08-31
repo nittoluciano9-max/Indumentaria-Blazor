@@ -43,13 +43,13 @@ else
         </div>
 
         <div class="col-12 col-md-6">
-            <p class="text-muted mb-1">@producto.Categoria?.Nombre · @producto.Genero</p>
+            <p class="rotulo mb-2">@producto.Categoria?.Nombre · @producto.Genero</p>
 
-            <h1 class="h2">@producto.Nombre</h1>
+            <h1>@producto.Nombre</h1>
 
-            <p class="fs-3 fw-bold">@producto.Precio.ToString("C0")</p>
+            <p class="precio">@producto.Precio.ToString("C0")</p>
 
-            <p>@producto.Descripcion</p>
+            <p class="descripcion">@producto.Descripcion</p>
 
             @if (producto.Stock == 0)
             {
@@ -67,7 +67,7 @@ else
                         @foreach (var talle in talles)
                         {
                             <button type="button"
-                                    class="btn @(talle == talleSeleccionado ? "btn-dark" : "btn-outline-dark")"
+                                    class="btn talle @(talle == talleSeleccionado ? "btn-dark" : "btn-outline-dark")"
                                     @key="talle"
                                     @onclick="() => SeleccionarTalle(talle)">
                                 @talle

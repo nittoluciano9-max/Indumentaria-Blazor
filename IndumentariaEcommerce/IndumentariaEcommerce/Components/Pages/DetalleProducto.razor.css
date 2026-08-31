@@ -3,11 +3,74 @@
 .contenedor-imagen {
     aspect-ratio: 3 / 4;
     overflow: hidden;
-    background-color: #f8f9fa;
+    background-color: #E8E6E1;
 }
 
 .contenedor-imagen img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+/* Migas de pan: son un dato de ubicación, no texto corrido. */
+.breadcrumb {
+    --bs-breadcrumb-divider-color:     var(--tinta-suave);
+    --bs-breadcrumb-item-active-color: var(--tinta-suave);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+h1 {
+    font-size: clamp(1.9rem, 5vw, 2.9rem);
+    margin-bottom: 1rem;
+}
+
+/* El precio pesa más que en la grilla: acá es la información que decide la
+   compra. Mismo token de acento que la tarjeta, que sobre blanco da 5,3:1. */
+.precio {
+    margin-bottom: 1.6rem;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--acento-fuerte);
+    font-variant-numeric: tabular-nums;
+}
+
+.descripcion {
+    max-width: 46ch;
+    margin-bottom: 2rem;
+    color: var(--tinta-suave);
+}
+
+/* Selector de talles: cuadrados y de ancho parejo, no píldoras.
+   El ancho mínimo evita que "S" quede más angosto que "XL" y la fila se vea
+   despareja. */
+.talle {
+    min-width: 3.4rem;
+    padding-inline: 0.75rem;
+    border-radius: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Bootstrap define btn-dark en #212529; se lo alinea con el negro del sitio.
+   El talle elegido queda en negro pleno, que se lee de un vistazo mejor que
+   un simple cambio de borde. */
+.btn-dark {
+    --bs-btn-bg:                 var(--negro);
+    --bs-btn-border-color:       var(--negro);
+    --bs-btn-color:              #FFFFFF;
+    --bs-btn-hover-bg:           var(--negro-2);
+    --bs-btn-hover-border-color: var(--negro-2);
+    --bs-btn-hover-color:        #FFFFFF;
+}
+
+.btn-outline-dark {
+    --bs-btn-color:              var(--tinta);
+    --bs-btn-border-color:       var(--linea);
+    --bs-btn-hover-bg:           var(--negro);
+    --bs-btn-hover-border-color: var(--negro);
+    --bs-btn-hover-color:        #FFFFFF;
 }
