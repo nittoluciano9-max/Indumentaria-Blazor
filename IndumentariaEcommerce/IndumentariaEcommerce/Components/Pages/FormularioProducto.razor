@@ -1,0 +1,198 @@
+@* Alta y edición de productos en un solo componente.
+   Dos rutas: si la URL trae Id se edita, si no se da de alta. Ese null es
+   toda la diferencia entre los dos modos. *@
+
+@page "/admin/productos/nuevo"
+@page "/admin/productos/{Id:int}/editar"
+
+@inject ProductoService ProductoService
+@inject NavigationManager Navegacion
+
+<PageTitle>@Titulo - Administración</PageTitle>
+
+<nav aria-label="Ubicación" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="/admin/productos">Productos</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Titulo</li>
+    </ol>
+</nav>
+
+<h1 class="h3 mb-4">@Titulo</h1>
+
+@if (cargando)
+{
+    <div class="d-flex align-items-center gap-2 text-muted">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Cargando...</span>
+    </div>
+}
+else if (noEncontrado)
+{
+    <div class="alert alert-warning">El producto que querés editar no existe.</div>
+    <a href="/admin/productos" class="btn btn-primary">Volver al listado</a>
+}
+else
+{
+    @* DataAnnotationsValidator es lo que activa los atributos de Producto.
+       Sin ese componente EditForm no valida nada: compila y corre igual,
+       pero acepta cualquier dato.
+       OnValidSubmit solo se dispara si la validación pasó, por eso el método
+       de guardado no vuelve a chequear. *@
+    <EditForm Model="modelo" OnValidSubmit="GuardarAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="alert alert-danger" />
+
+        <div class="row g-3">
+
+            <div class="col-12">
+                <label class="form-label" for="nombre">Nombre</label>
+                @* InputText y no <input>: está conectado al EditContext, así
+                   que dispara la validación del campo y agrega solo las
+                   clases modified / valid / invalid. *@
+                <InputText id="nombre" class="form-control" @bind-Value="modelo.Nombre" />
+                <ValidationMessage For="() => modelo.Nombre" class="text-danger small" />
+            </div>
+
+            <div class="col-12">
+                <label class="form-label" for="descripcion">Descripción</label>
+                <InputTextArea id="descripcion" class="form-control" rows="3"
+                               @bind-Value="modelo.Descripcion" />
+                <ValidationMessage For="() => modelo.Descripcion" class="text-danger small" />
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label class="form-label" for="precio">Precio</label>
+                <InputNumber id="precio" class="form-control" step="0.01"
+                             @bind-Value="modelo.Precio" />
+                <ValidationMessage For="() => modelo.Precio" class="text-danger small" />
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label class="form-label" for="stock">Stock</label>
+                <InputNumber id="stock" class="form-control" @bind-Value="modelo.Stock" />
+                <ValidationMessage For="() => modelo.Stock" class="text-danger small" />
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label" for="genero">Género</label>
+                <InputSelect id="genero" class="form-select" @bind-Value="modelo.Genero">
+                    @foreach (var valor in Enum.GetValues<Genero>())
+                    {
+                        <option value="@valor">@valor</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label" for="categoria">Categoría</label>
+                @* La opción vacía vale 0, y el [Range(1, ...)] de CategoriaId
+                   la rechaza: "no elegí categoría" se convierte en un error de
+                   validación sin escribir código para eso. *@
+                <InputSelect id="categoria" class="form-select" @bind-Value="modelo.CategoriaId">
+                    <option value="0">Seleccioná una categoría</option>
+                    @foreach (var categoria in categorias)
+                    {
+                        <option value="@categoria.Id">@categoria.Nombre</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => modelo.CategoriaId" class="text-danger small" />
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="talles">Talles</label>
+                <InputText id="talles" class="form-control" @bind-Value="modelo.Talles" />
+                <div class="form-text">Separados por coma, sin espacios. Por ejemplo: S,M,L,XL</div>
+                <ValidationMessage For="() => modelo.Talles" class="text-danger small" />
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="imagen">Imagen</label>
+                <InputText id="imagen" class="form-control" @bind-Value="modelo.ImagenUrl" />
+                <div class="form-text">Ruta dentro de wwwroot. Por ejemplo: /imagenes/remera-lisa.jpg</div>
+                <ValidationMessage For="() => modelo.ImagenUrl" class="text-danger small" />
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary" disabled="@guardando">
+                    @(guardando ? "Guardando..." : "Guardar")
+                </button>
+                <a href="/admin/productos" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+
+        </div>
+    </EditForm>
+}
+
+@code {
+    /// <summary>
+    /// null cuando la ruta es /nuevo. Es lo único que distingue el alta de la
+    /// edición.
+    /// </summary>
+    [Parameter]
+    public int? Id { get; set; }
+
+    private Producto modelo = new();
+    private List<Categoria> categorias = new();
+
+    private bool cargando = true;
+    private bool noEncontrado;
+    private bool guardando;
+
+    private bool EsEdicion => Id is not null;
+
+    private string Titulo => EsEdicion ? "Editar producto" : "Nuevo producto";
+
+    // OnParametersSetAsync y no OnInitializedAsync, por lo mismo que en
+    // DetalleProducto: al pasar de editar un producto a editar otro, Blazor
+    // reutiliza la instancia del componente.
+    protected override async Task OnParametersSetAsync()
+    {
+        cargando = true;
+        noEncontrado = false;
+
+        categorias = await ProductoService.ObtenerCategoriasAsync();
+
+        if (Id is null)
+        {
+            modelo = new Producto();
+        }
+        else
+        {
+            var existente = await ProductoService.ObtenerPorIdAsync(Id.Value);
+
+            if (existente is null)
+            {
+                noEncontrado = true;
+            }
+            else
+            {
+                // Se descarta la navegación: el formulario edita CategoriaId y
+                // el objeto Categoria adjunto quedaría desactualizado apenas el
+                // usuario cambie de categoría.
+                existente.Categoria = null;
+                modelo = existente;
+            }
+        }
+
+        cargando = false;
+    }
+
+    /// <summary>
+    /// Solo se ejecuta si la validación pasó: OnValidSubmit se encarga de eso.
+    /// </summary>
+    private async Task GuardarAsync()
+    {
+        guardando = true;
+
+        if (EsEdicion)
+        {
+            await ProductoService.ActualizarAsync(modelo);
+        }
+        else
+        {
+            await ProductoService.CrearAsync(modelo);
+        }
+
+        Navegacion.NavigateTo("/admin/productos");
+    }
+}
