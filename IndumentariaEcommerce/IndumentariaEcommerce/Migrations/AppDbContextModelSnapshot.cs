@@ -38,31 +38,31 @@ namespace IndumentariaEcommerce.Migrations
                         new
                         {
                             Id = 1,
-                            Descripcion = "Remeras, musculosas y tops de algodón y fibras técnicas.",
+                            Descripcion = "Remeras y tops de algodón, lisos y estampados.",
                             Nombre = "Remeras"
                         },
                         new
                         {
                             Id = 2,
-                            Descripcion = "Jeans, joggings, cargos y pantalones de vestir.",
+                            Descripcion = "Jeans, joggings, cargos y bermudas.",
                             Nombre = "Pantalones"
                         },
                         new
                         {
                             Id = 3,
-                            Descripcion = "Camperas, buzos y abrigos para media estación e invierno.",
-                            Nombre = "Camperas"
+                            Descripcion = "Camperas, buzos con capucha y abrigo para todo el año.",
+                            Nombre = "Camperas y Buzos"
                         },
                         new
                         {
                             Id = 4,
-                            Descripcion = "Vestidos y enteritos para uso diario y ocasiones especiales.",
+                            Descripcion = "Vestidos y enteritos para uso diario.",
                             Nombre = "Vestidos"
                         },
                         new
                         {
                             Id = 5,
-                            Descripcion = "Zapatillas, borcegos y sandalias urbanas.",
+                            Descripcion = "Zapatillas urbanas, deportivas y de skate.",
                             Nombre = "Calzado"
                         });
                 });
@@ -118,7 +118,7 @@ namespace IndumentariaEcommerce.Migrations
                         {
                             Id = 1,
                             CategoriaId = 1,
-                            Descripcion = "Remera de algodón peinado, cuello redondo reforzado y corte clásico.",
+                            Descripcion = "Remera de algodón peinado con cuello redondo reforzado y una estampa chica al frente. Corte clásico.",
                             Genero = 0,
                             ImagenUrl = "/imagenes/remera-lisa.jpg",
                             Nombre = "Remera Lisa de Algodón",
@@ -130,7 +130,7 @@ namespace IndumentariaEcommerce.Migrations
                         {
                             Id = 2,
                             CategoriaId = 1,
-                            Descripcion = "Remera de corte amplio con estampa frontal serigrafiada.",
+                            Descripcion = "Remera negra de corte amplio con estampa serigrafiada en la espalda.",
                             Genero = 1,
                             ImagenUrl = "/imagenes/remera-oversize.jpg",
                             Nombre = "Remera Oversize Estampada",
@@ -142,6 +142,42 @@ namespace IndumentariaEcommerce.Migrations
                         {
                             Id = 3,
                             CategoriaId = 1,
+                            Descripcion = "Algodón negro con estampa tipográfica en blanco. Tacto suave y caída recta.",
+                            Genero = 0,
+                            ImagenUrl = "/imagenes/remera-negra.jpg",
+                            Nombre = "Remera Negra Estampada",
+                            Precio = 29900.0,
+                            Stock = 24,
+                            Talles = "M,L,XL"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CategoriaId = 1,
+                            Descripcion = "Gris jaspeado con estampa caligráfica al frente. Hombro caído y cuerpo ancho.",
+                            Genero = 0,
+                            ImagenUrl = "/imagenes/remera-jaspeada.jpg",
+                            Nombre = "Remera Oversize Jaspeada",
+                            Precio = 31900.0,
+                            Stock = 19,
+                            Talles = "S,M,L,XL"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CategoriaId = 1,
+                            Descripcion = "Algodón blanco con estampa central en rojo. Cuello redondo y corte recto.",
+                            Genero = 1,
+                            ImagenUrl = "/imagenes/remera-estampa.jpg",
+                            Nombre = "Remera Blanca con Estampa",
+                            Precio = 28900.0,
+                            Stock = 33,
+                            Talles = "XS,S,M,L"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CategoriaId = 1,
                             Descripcion = "Remera de modal y algodón, caída suave y escote en V.",
                             Genero = 1,
                             ImagenUrl = "/imagenes/remera-cuello-v.jpg",
@@ -149,42 +185,6 @@ namespace IndumentariaEcommerce.Migrations
                             Precio = 22900.0,
                             Stock = 55,
                             Talles = "XS,S,M,L"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CategoriaId = 1,
-                            Descripcion = "Manga larga a rayas horizontales en algodón liviano.",
-                            Genero = 0,
-                            ImagenUrl = "/imagenes/remera-rayada.jpg",
-                            Nombre = "Remera Manga Larga Rayada",
-                            Precio = 31900.0,
-                            Stock = 19,
-                            Talles = "M,L,XL"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CategoriaId = 1,
-                            Descripcion = "Tejido técnico de secado rápido con paneles de ventilación.",
-                            Genero = 2,
-                            ImagenUrl = "/imagenes/remera-dryfit.jpg",
-                            Nombre = "Remera Deportiva Dry-Fit",
-                            Precio = 29900.0,
-                            Stock = 36,
-                            Talles = "S,M,L,XL"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CategoriaId = 1,
-                            Descripcion = "Musculosa básica de algodón con sisa amplia.",
-                            Genero = 0,
-                            ImagenUrl = "/imagenes/musculosa.jpg",
-                            Nombre = "Musculosa de Algodón",
-                            Precio = 19900.0,
-                            Stock = 31,
-                            Talles = "M,L,XL"
                         },
                         new
                         {
@@ -202,19 +202,19 @@ namespace IndumentariaEcommerce.Migrations
                         {
                             Id = 8,
                             CategoriaId = 2,
-                            Descripcion = "Jean de denim elastizado con cinco bolsillos y lavado clásico.",
-                            Genero = 0,
-                            ImagenUrl = "/imagenes/jean-slim.jpg",
-                            Nombre = "Jean Slim Fit Azul",
-                            Precio = 68900.0,
-                            Stock = 22,
-                            Talles = "38,40,42,44"
+                            Descripcion = "Denim azul de corte recto y largo al tobillo, con cinco bolsillos.",
+                            Genero = 1,
+                            ImagenUrl = "/imagenes/jean-recto.jpg",
+                            Nombre = "Jean Recto Azul",
+                            Precio = 69900.0,
+                            Stock = 21,
+                            Talles = "34,36,38,40"
                         },
                         new
                         {
                             Id = 9,
                             CategoriaId = 2,
-                            Descripcion = "Denim rígido de tiro alto con calce holgado en la pierna.",
+                            Descripcion = "Denim rígido de tiro alto con calce holgado en la pierna y lavado claro.",
                             Genero = 1,
                             ImagenUrl = "/imagenes/jean-mom.jpg",
                             Nombre = "Jean Mom Fit",
@@ -226,6 +226,18 @@ namespace IndumentariaEcommerce.Migrations
                         {
                             Id = 10,
                             CategoriaId = 2,
+                            Descripcion = "Corte clásico de cinco bolsillos en denim rígido, con etiqueta de cuero en la cintura.",
+                            Genero = 1,
+                            ImagenUrl = "/imagenes/jean-tiro-alto.jpg",
+                            Nombre = "Jean Clásico de Tiro Alto",
+                            Precio = 76900.0,
+                            Stock = 15,
+                            Talles = "34,36,38,40"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CategoriaId = 2,
                             Descripcion = "Gabardina resistente con bolsillos laterales y puño ajustable.",
                             Genero = 2,
                             ImagenUrl = "/imagenes/cargo-beige.jpg",
@@ -236,43 +248,19 @@ namespace IndumentariaEcommerce.Migrations
                         },
                         new
                         {
-                            Id = 11,
+                            Id = 12,
                             CategoriaId = 2,
                             Descripcion = "Jogging de frisa perchada con cordón y puños elastizados.",
-                            Genero = 2,
+                            Genero = 1,
                             ImagenUrl = "/imagenes/jogging-frisa.jpg",
                             Nombre = "Jogging de Frisa",
                             Precio = 45900.0,
                             Stock = 40,
-                            Talles = "S,M,L,XL"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            CategoriaId = 2,
-                            Descripcion = "Corte recto en tejido de lana fría, con pinzas al frente.",
-                            Genero = 0,
-                            ImagenUrl = "/imagenes/pantalon-vestir.jpg",
-                            Nombre = "Pantalón de Vestir",
-                            Precio = 79900.0,
-                            Stock = 14,
-                            Talles = "40,42,44,46"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            CategoriaId = 2,
-                            Descripcion = "Calza de tiro alto en lycra con bolsillo lateral para celular.",
-                            Genero = 1,
-                            ImagenUrl = "/imagenes/calza-deportiva.jpg",
-                            Nombre = "Calza Deportiva",
-                            Precio = 38900.0,
-                            Stock = 33,
                             Talles = "XS,S,M,L"
                         },
                         new
                         {
-                            Id = 14,
+                            Id = 13,
                             CategoriaId = 2,
                             Descripcion = "Bermuda de gabardina de algodón con cintura ajustable.",
                             Genero = 0,
@@ -284,31 +272,55 @@ namespace IndumentariaEcommerce.Migrations
                         },
                         new
                         {
-                            Id = 15,
+                            Id = 14,
                             CategoriaId = 3,
-                            Descripcion = "Biker de cuero sintético con cierres metálicos y forro interior.",
-                            Genero = 1,
-                            ImagenUrl = "/imagenes/campera-cuero.jpg",
-                            Nombre = "Campera de Cuero Ecológico",
-                            Precio = 189900.0,
-                            Stock = 8,
-                            Talles = "S,M,L"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            CategoriaId = 3,
-                            Descripcion = "Campera inflable con relleno sintético y capucha desmontable.",
-                            Genero = 2,
+                            Descripcion = "Campera inflable con canesú negro contrastante, cuello alto y relleno sintético.",
+                            Genero = 0,
                             ImagenUrl = "/imagenes/campera-puffer.jpg",
-                            Nombre = "Campera Puffer",
-                            Precio = 145900.0,
+                            Nombre = "Campera Puffer Naranja",
+                            Precio = 165900.0,
                             Stock = 16,
                             Talles = "S,M,L,XL"
                         },
                         new
                         {
+                            Id = 15,
+                            CategoriaId = 3,
+                            Descripcion = "Puffer negra de tejido satinado con capucha y puños elastizados.",
+                            Genero = 0,
+                            ImagenUrl = "/imagenes/campera-puffer-negra.jpg",
+                            Nombre = "Campera Puffer Negra",
+                            Precio = 189900.0,
+                            Stock = 9,
+                            Talles = "M,L,XL"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            CategoriaId = 3,
+                            Descripcion = "Campera de denim con lavado claro, bolsillos con tapa y botones metálicos.",
+                            Genero = 2,
+                            ImagenUrl = "/imagenes/campera-jean.jpg",
+                            Nombre = "Campera de Jean",
+                            Precio = 94900.0,
+                            Stock = 0,
+                            Talles = "S,M,L,XL"
+                        },
+                        new
+                        {
                             Id = 17,
+                            CategoriaId = 3,
+                            Descripcion = "Denim crudo sin lavar, cuello con solapa y costuras contrastantes. Se ablanda con el uso.",
+                            Genero = 0,
+                            ImagenUrl = "/imagenes/campera-jean-clasica.jpg",
+                            Nombre = "Campera de Jean Clásica",
+                            Precio = 154900.0,
+                            Stock = 7,
+                            Talles = "M,L,XL"
+                        },
+                        new
+                        {
+                            Id = 18,
                             CategoriaId = 3,
                             Descripcion = "Buzo de frisa con bolsillo canguro y capucha con cordón.",
                             Genero = 2,
@@ -320,55 +332,55 @@ namespace IndumentariaEcommerce.Migrations
                         },
                         new
                         {
-                            Id = 18,
-                            CategoriaId = 3,
-                            Descripcion = "Rompeviento liviano con costuras selladas y capucha plegable.",
-                            Genero = 0,
-                            ImagenUrl = "/imagenes/rompeviento.jpg",
-                            Nombre = "Campera Rompeviento",
-                            Precio = 89900.0,
-                            Stock = 12,
-                            Talles = "M,L,XL"
-                        },
-                        new
-                        {
                             Id = 19,
                             CategoriaId = 3,
-                            Descripcion = "Cardigan tejido de punto grueso con botones de nácar.",
+                            Descripcion = "Buzo blanco de corte amplio con capucha forrada y bolsillo canguro.",
                             Genero = 1,
-                            ImagenUrl = "/imagenes/cardigan.jpg",
-                            Nombre = "Cardigan de Punto",
-                            Precio = 67900.0,
-                            Stock = 17,
+                            ImagenUrl = "/imagenes/buzo-blanco-mujer.jpg",
+                            Nombre = "Buzo Oversize Blanco",
+                            Precio = 64900.0,
+                            Stock = 22,
                             Talles = "S,M,L"
                         },
                         new
                         {
                             Id = 20,
                             CategoriaId = 3,
-                            Descripcion = "Campera de denim con lavado stone y bolsillos con tapa.",
-                            Genero = 2,
-                            ImagenUrl = "/imagenes/campera-jean.jpg",
-                            Nombre = "Campera de Jean",
-                            Precio = 94900.0,
-                            Stock = 0,
-                            Talles = "S,M,L,XL"
+                            Descripcion = "Frisa blanca de gramaje alto, capucha con cordón y puños acanalados.",
+                            Genero = 0,
+                            ImagenUrl = "/imagenes/buzo-blanco-hombre.jpg",
+                            Nombre = "Buzo con Capucha Blanco",
+                            Precio = 62900.0,
+                            Stock = 26,
+                            Talles = "M,L,XL"
                         },
                         new
                         {
                             Id = 21,
                             CategoriaId = 3,
-                            Descripcion = "Chaleco acolchado sin mangas, ideal para entretiempo.",
-                            Genero = 0,
-                            ImagenUrl = "/imagenes/chaleco.jpg",
-                            Nombre = "Chaleco Inflable",
-                            Precio = 78900.0,
-                            Stock = 20,
-                            Talles = "M,L,XL"
+                            Descripcion = "Buzo naranja con texto estampado al frente, bolsillo canguro y bordes deshilachados.",
+                            Genero = 2,
+                            ImagenUrl = "/imagenes/buzo-naranja.jpg",
+                            Nombre = "Buzo Naranja Estampado",
+                            Precio = 67900.0,
+                            Stock = 14,
+                            Talles = "S,M,L,XL"
                         },
                         new
                         {
                             Id = 22,
+                            CategoriaId = 3,
+                            Descripcion = "Buzo de frisa sin estampa, disponible en negro y gris. Capucha con cordón plano.",
+                            Genero = 2,
+                            ImagenUrl = "/imagenes/buzo-liso.jpg",
+                            Nombre = "Buzo de Frisa Liso",
+                            Precio = 54900.0,
+                            Stock = 38,
+                            Talles = "S,M,L,XL"
+                        },
+                        new
+                        {
+                            Id = 23,
                             CategoriaId = 4,
                             Descripcion = "Vestido midi de viscosa con estampa floral y cintura elastizada.",
                             Genero = 1,
@@ -377,18 +389,6 @@ namespace IndumentariaEcommerce.Migrations
                             Precio = 84900.0,
                             Stock = 15,
                             Talles = "XS,S,M,L"
-                        },
-                        new
-                        {
-                            Id = 23,
-                            CategoriaId = 4,
-                            Descripcion = "Vestido largo con espalda descubierta y falda de caída fluida.",
-                            Genero = 1,
-                            ImagenUrl = "/imagenes/vestido-fiesta.jpg",
-                            Nombre = "Vestido Largo de Fiesta",
-                            Precio = 129900.0,
-                            Stock = 6,
-                            Talles = "S,M,L"
                         },
                         new
                         {
@@ -406,18 +406,6 @@ namespace IndumentariaEcommerce.Migrations
                         {
                             Id = 25,
                             CategoriaId = 4,
-                            Descripcion = "Vestido corto de lino con breteles regulables.",
-                            Genero = 1,
-                            ImagenUrl = "/imagenes/vestido-lino.jpg",
-                            Nombre = "Vestido de Verano de Lino",
-                            Precio = 69900.0,
-                            Stock = 26,
-                            Talles = "XS,S,M"
-                        },
-                        new
-                        {
-                            Id = 26,
-                            CategoriaId = 4,
                             Descripcion = "Enterito de denim liviano con bolsillo frontal y tiradores.",
                             Genero = 1,
                             ImagenUrl = "/imagenes/enterito-jean.jpg",
@@ -428,21 +416,21 @@ namespace IndumentariaEcommerce.Migrations
                         },
                         new
                         {
-                            Id = 27,
+                            Id = 26,
                             CategoriaId = 5,
-                            Descripcion = "Zapatillas de lona con suela de goma vulcanizada.",
-                            Genero = 2,
+                            Descripcion = "Zapatillas blancas de caña baja con perforaciones laterales y suela de goma.",
+                            Genero = 1,
                             ImagenUrl = "/imagenes/zapatillas-urbanas.jpg",
                             Nombre = "Zapatillas Urbanas",
                             Precio = 119900.0,
                             Stock = 30,
-                            Talles = "38,39,40,41,42,43"
+                            Talles = "36,37,38,39,40"
                         },
                         new
                         {
-                            Id = 28,
+                            Id = 27,
                             CategoriaId = 5,
-                            Descripcion = "Zapatillas de entrenamiento con amortiguación en el talón.",
+                            Descripcion = "Zapatillas de entrenamiento con cámara de aire visible en el talón y empeine de malla.",
                             Genero = 0,
                             ImagenUrl = "/imagenes/zapatillas-running.jpg",
                             Nombre = "Zapatillas Running",
@@ -452,27 +440,39 @@ namespace IndumentariaEcommerce.Migrations
                         },
                         new
                         {
+                            Id = 28,
+                            CategoriaId = 5,
+                            Descripcion = "Cuero blanco con suela gruesa y correa al empeine. Un clásico de todos los días.",
+                            Genero = 2,
+                            ImagenUrl = "/imagenes/zapatillas-blancas.jpg",
+                            Nombre = "Zapatillas Clásicas Blancas",
+                            Precio = 129900.0,
+                            Stock = 25,
+                            Talles = "38,39,40,41,42,43"
+                        },
+                        new
+                        {
                             Id = 29,
                             CategoriaId = 5,
-                            Descripcion = "Borcegos de cuero vacuno con cordones y suela tractora.",
-                            Genero = 1,
-                            ImagenUrl = "/imagenes/borcegos.jpg",
-                            Nombre = "Borcegos de Cuero",
-                            Precio = 156900.0,
-                            Stock = 9,
-                            Talles = "36,37,38,39,40"
+                            Descripcion = "Caña media en cuero blanco con paneles rojos y malla lateral. Silueta retro de básquet.",
+                            Genero = 0,
+                            ImagenUrl = "/imagenes/zapatillas-retro.jpg",
+                            Nombre = "Zapatillas Retro Rojas",
+                            Precio = 172900.0,
+                            Stock = 12,
+                            Talles = "40,41,42,43,44"
                         },
                         new
                         {
                             Id = 30,
                             CategoriaId = 5,
-                            Descripcion = "Sandalias bajas de cuero natural con hebilla ajustable.",
-                            Genero = 1,
-                            ImagenUrl = "/imagenes/sandalias.jpg",
-                            Nombre = "Sandalias de Cuero",
-                            Precio = 54900.0,
-                            Stock = 25,
-                            Talles = "36,37,38,39,40"
+                            Descripcion = "Modelo de skate con paneles de colores, gamuza texturada y suela vulcanizada.",
+                            Genero = 2,
+                            ImagenUrl = "/imagenes/zapatillas-skate.jpg",
+                            Nombre = "Zapatillas Skate Estampadas",
+                            Precio = 145900.0,
+                            Stock = 10,
+                            Talles = "38,39,40,41,42,43"
                         });
                 });
 
