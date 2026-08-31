@@ -75,16 +75,20 @@ falta).
 
 ## Requisitos de la consigna
 
-Estos puntos se evalúan, así que ninguno es opcional:
+Estos puntos se evalúan, así que ninguno es opcional. Los ocho están cumplidos;
+al lado de cada uno, dónde se demuestra.
 
-- [ ] Mínimo **6 componentes Razor** propios.
-- [ ] **EditForm** con validaciones (DataAnnotations + `ValidationMessage`).
-- [ ] **State Service** para el carrito, registrado en `Program.cs`.
-- [ ] **CSS Isolation** (archivos `.razor.css`).
-- [ ] **Bootstrap** y diseño responsive.
-- [ ] **JS Interop** con `localStorage` (persistir el carrito).
-- [ ] **Migraciones de EF Core** con datos semilla.
-- [ ] Commits en formato **Conventional Commits**.
+- [x] Mínimo **6 componentes Razor** propios — hay 9: `Catalogo`, `TarjetaProducto`, `FiltroProductos`, `Paginacion`, `DetalleProducto`, `IconoCarrito`, `Carrito`, `AdminProductos` y `FormularioProducto`.
+- [x] **EditForm** con validaciones — `FormularioProducto.razor`, con `DataAnnotationsValidator`, `ValidationSummary` y siete `ValidationMessage`. Las reglas se declaran una sola vez, en `Producto.cs`.
+- [x] **State Service** para el carrito — `Services/CarritoService.cs`, registrado como `Scoped` en `Program.cs`.
+- [x] **CSS Isolation** — seis `.razor.css` propios, más los dos que traía la plantilla.
+- [x] **Bootstrap** y diseño responsive — grilla del catálogo, tabla del panel con `table-responsive` y formulario en dos columnas.
+- [x] **JS Interop** con `localStorage` — `wwwroot/js/almacenamiento.js`, invocado desde `CarritoService` para persistir y rehidratar el carrito.
+- [x] **Migraciones de EF Core** con datos semilla — `MigracionInicial`, con 5 categorías y 30 productos.
+- [x] Commits en formato **Conventional Commits** — todo el historial.
+
+Pendiente fuera de la consigna: faltan las 30 imágenes reales del catálogo (ver
+`IMAGENES.md`). Hasta que estén, las tarjetas muestran un placeholder.
 
 ## Estructura de carpetas
 
