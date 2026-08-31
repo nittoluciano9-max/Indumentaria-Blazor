@@ -1,0 +1,11 @@
+.celda-imagen {
+    width: 56px;
+}
+
+.miniatura {
+    width: 40px;
+    height: 53px;
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+}

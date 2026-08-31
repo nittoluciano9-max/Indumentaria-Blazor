@@ -1,0 +1,159 @@
+@* Listado de administración. Reutiliza el mismo componente Paginacion que el
+   catálogo: como recibe dos números y devuelve uno, no sabe ni le importa qué
+   está paginando. *@
+
+@page "/admin/productos"
+@inject ProductoService ProductoService
+
+<PageTitle>Administración de productos</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <h1 class="mb-0">Productos</h1>
+    <a href="/admin/productos/nuevo" class="btn btn-primary">Nuevo producto</a>
+</div>
+
+@if (mensaje is not null)
+{
+    <div class="alert alert-success alert-dismissible d-flex justify-content-between">
+        <span>@mensaje</span>
+        <button type="button" class="btn-close" aria-label="Cerrar"
+                @onclick="() => mensaje = null"></button>
+    </div>
+}
+
+@if (resultado is null)
+{
+    <div class="d-flex align-items-center gap-2 text-muted">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Cargando productos...</span>
+    </div>
+}
+else if (resultado.Items.Count == 0)
+{
+    <div class="alert alert-info">No hay productos cargados.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th scope="col"><span class="visually-hidden">Imagen</span></th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Categoría</th>
+                    <th scope="col">Género</th>
+                    <th scope="col" class="text-end">Precio</th>
+                    <th scope="col" class="text-end">Stock</th>
+                    <th scope="col" class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var producto in resultado.Items)
+                {
+                    <tr @key="producto.Id">
+                        <td class="celda-imagen">
+                            <img class="miniatura"
+                                 src="@producto.ImagenUrl"
+                                 alt=""
+                                 onerror="this.onerror=null; this.src='/imagenes/sin-imagen.svg';" />
+                        </td>
+
+                        <td>@producto.Nombre</td>
+                        <td class="text-muted">@producto.Categoria?.Nombre</td>
+                        <td class="text-muted">@producto.Genero</td>
+                        <td class="text-end">@producto.Precio.ToString("C0")</td>
+
+                        <td class="text-end">
+                            @if (producto.Stock == 0)
+                            {
+                                <span class="badge text-bg-secondary">Sin stock</span>
+                            }
+                            else
+                            {
+                                @producto.Stock
+                            }
+                        </td>
+
+                        <td class="text-end text-nowrap">
+                            @* Confirmación sin JavaScript: al pedir la baja se
+                               reemplazan los botones de esa fila. Todo el
+                               estado que hace falta es un int? *@
+                            @if (idAEliminar == producto.Id)
+                            {
+                                <span class="small text-danger me-2">¿Eliminar?</span>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        @onclick="() => EliminarAsync(producto)">
+                                    Sí
+                                </button>
+                                <button type="button" class="btn btn-sm btn-secondary"
+                                        @onclick="() => idAEliminar = null">
+                                    No
+                                </button>
+                            }
+                            else
+                            {
+                                <a href="/admin/productos/@producto.Id/editar"
+                                   class="btn btn-sm btn-outline-primary">Editar</a>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        @onclick="() => idAEliminar = producto.Id">
+                                    Eliminar
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <Paginacion PaginaActual="resultado.PaginaActual"
+                TotalPaginas="resultado.TotalPaginas"
+                OnCambioPagina="IrAPaginaAsync" />
+}
+
+@code {
+    /// <summary>Menos filas por página que en el catálogo: es una tabla,
+    /// no una grilla de tarjetas.</summary>
+    private const int FilasPorPagina = 10;
+
+    private ResultadoPaginado<Producto>? resultado;
+    private int pagina = 1;
+
+    private int? idAEliminar;
+    private string? mensaje;
+
+    protected override Task OnInitializedAsync() => CargarAsync();
+
+    private Task IrAPaginaAsync(int nuevaPagina)
+    {
+        pagina = nuevaPagina;
+        idAEliminar = null;
+        return CargarAsync();
+    }
+
+    private async Task EliminarAsync(Producto producto)
+    {
+        var eliminado = await ProductoService.EliminarAsync(producto.Id);
+
+        idAEliminar = null;
+        mensaje = eliminado
+            ? $"Se eliminó \"{producto.Nombre}\"."
+            : "El producto ya no existía.";
+
+        // Si se borró el último item de la página, hay que retroceder una:
+        // si no, quedaría mostrando una página que ya no existe.
+        if (resultado is not null && resultado.Items.Count == 1 && pagina > 1)
+        {
+            pagina--;
+        }
+
+        await CargarAsync();
+    }
+
+    private async Task CargarAsync()
+    {
+        resultado = await ProductoService.BuscarAsync(
+            pagina: pagina,
+            tamanioPagina: FilasPorPagina);
+    }
+}

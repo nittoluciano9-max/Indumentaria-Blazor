@@ -110,4 +110,79 @@ public class ProductoService
             .OrderBy(c => c.Nombre)
             .ToListAsync();
     }
+
+    // ---------- Escritura (panel de administración) ----------
+
+    /// <summary>
+    /// Da de alta un producto y devuelve el Id que le asignó la base.
+    /// </summary>
+    public async Task<int> CrearAsync(Producto producto)
+    {
+        await using var contexto = await _fabrica.CreateDbContextAsync();
+
+        // Se descarta la navegación: el formulario solo completa CategoriaId.
+        // Si viniera un objeto Categoria adjunto, EF Core lo trataría como una
+        // categoría nueva e intentaría insertarla de nuevo.
+        producto.Categoria = null;
+
+        contexto.Productos.Add(producto);
+        await contexto.SaveChangesAsync();
+
+        return producto.Id;
+    }
+
+    /// <summary>
+    /// Actualiza un producto existente. Devuelve false si el Id no existe.
+    /// </summary>
+    public async Task<bool> ActualizarAsync(Producto producto)
+    {
+        await using var contexto = await _fabrica.CreateDbContextAsync();
+
+        // Sin AsNoTracking, al revés que en las consultas del catálogo: acá el
+        // rastreo es justamente lo que hace falta. EF Core guarda una copia de
+        // los valores originales y, al llamar SaveChanges, compara contra el
+        // estado actual y arma un UPDATE solo con las columnas que cambiaron.
+        // Traída con AsNoTracking no habría copia contra qué comparar y
+        // SaveChanges no generaría ninguna sentencia.
+        var existente = await contexto.Productos
+            .FirstOrDefaultAsync(p => p.Id == producto.Id);
+
+        if (existente is null)
+        {
+            return false;
+        }
+
+        existente.Nombre = producto.Nombre;
+        existente.Descripcion = producto.Descripcion;
+        existente.Precio = producto.Precio;
+        existente.Stock = producto.Stock;
+        existente.ImagenUrl = producto.ImagenUrl;
+        existente.Talles = producto.Talles;
+        existente.Genero = producto.Genero;
+        existente.CategoriaId = producto.CategoriaId;
+
+        await contexto.SaveChangesAsync();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Elimina un producto. Devuelve false si el Id no existe.
+    /// </summary>
+    public async Task<bool> EliminarAsync(int id)
+    {
+        await using var contexto = await _fabrica.CreateDbContextAsync();
+
+        var producto = await contexto.Productos.FindAsync(id);
+
+        if (producto is null)
+        {
+            return false;
+        }
+
+        contexto.Productos.Remove(producto);
+        await contexto.SaveChangesAsync();
+
+        return true;
+    }
 }
