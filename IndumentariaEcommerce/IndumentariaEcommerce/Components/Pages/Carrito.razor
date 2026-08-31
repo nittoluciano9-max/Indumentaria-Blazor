@@ -47,7 +47,7 @@ else
                                            class="text-decoration-none text-reset">
                                             <h6 class="mb-1">@item.Nombre</h6>
                                         </a>
-                                        <p class="text-muted small mb-2">
+                                        <p class="rotulo mb-2">
                                             Talle @item.Talle ·
                                             @item.PrecioUnitario.ToString("C0") c/u
                                         </p>
@@ -70,7 +70,7 @@ else
                                                 @onclick="() => CambiarCantidadAsync(item, item.Cantidad - 1)">
                                             -
                                         </button>
-                                        <span class="btn btn-outline-secondary disabled">
+                                        <span class="btn btn-outline-secondary disabled cantidad">
                                             @item.Cantidad
                                         </span>
                                         <button type="button"
@@ -80,7 +80,7 @@ else
                                         </button>
                                     </div>
 
-                                    <span class="fw-bold">@item.Subtotal.ToString("C0")</span>
+                                    <span class="subtotal">@item.Subtotal.ToString("C0")</span>
                                 </div>
 
                             </div>
@@ -103,7 +103,7 @@ else
 
                     <hr />
 
-                    <div class="d-flex justify-content-between fs-5 fw-bold">
+                    <div class="d-flex justify-content-between total">
                         <span>Total</span>
                         <span>@ServicioCarrito.Total.ToString("C0")</span>
                     </div>
