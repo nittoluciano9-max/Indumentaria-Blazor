@@ -2,6 +2,7 @@
    no matchea y devuelve 404 en lugar de fallar al convertir el valor. *@
 @page "/producto/{Id:int}"
 @inject ProductoService ProductoService
+@inject CarritoService Carrito
 
 <PageTitle>@(producto?.Nombre ?? "Producto") - Indumentaria</PageTitle>
 
@@ -68,7 +69,7 @@ else
                             <button type="button"
                                     class="btn @(talle == talleSeleccionado ? "btn-dark" : "btn-outline-dark")"
                                     @key="talle"
-                                    @onclick="() => talleSeleccionado = talle">
+                                    @onclick="() => SeleccionarTalle(talle)">
                                 @talle
                             </button>
                         }
@@ -82,17 +83,23 @@ else
                     </p>
                 }
 
-                @* Sin @onclick todavía: el CarritoService se agrega en el paso
-                   siguiente y ahí se conecta este botón. *@
                 <button type="button"
                         class="btn btn-primary btn-lg w-100"
-                        disabled="@(talleSeleccionado is null)">
+                        disabled="@(talleSeleccionado is null)"
+                        @onclick="AgregarAlCarritoAsync">
                     Agregar al carrito
                 </button>
 
                 @if (talleSeleccionado is null)
                 {
                     <p class="text-muted small mt-2 mb-0">Elegí un talle para continuar.</p>
+                }
+                else if (agregadoAlCarrito)
+                {
+                    <div class="alert alert-success mt-3 mb-0 d-flex justify-content-between align-items-center">
+                        <span>Agregado al carrito.</span>
+                        <a href="/carrito" class="btn btn-sm btn-success">Ver carrito</a>
+                    </div>
                 }
             }
         </div>
@@ -112,6 +119,8 @@ else
     // consulta, o el Id no existe. Este flag las separa.
     private bool cargando = true;
 
+    private bool agregadoAlCarrito;
+
     /// <summary>
     /// Va acá y no en OnInitializedAsync: al navegar de /producto/1 a
     /// /producto/2 Blazor reutiliza la misma instancia del componente porque
@@ -123,6 +132,7 @@ else
     {
         cargando = true;
         talleSeleccionado = null;
+        agregadoAlCarrito = false;
 
         producto = await ProductoService.ObtenerPorIdAsync(Id);
 
@@ -131,5 +141,30 @@ else
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
 
         cargando = false;
+    }
+
+    private void SeleccionarTalle(string talle)
+    {
+        talleSeleccionado = talle;
+
+        // Se oculta la confirmación anterior: si el usuario cambia de talle
+        // después de agregar, ese cartel ya no corresponde a lo que ve.
+        agregadoAlCarrito = false;
+    }
+
+    /// <summary>
+    /// Acá se ve el State Service en acción: este componente no conoce a
+    /// IconoCarrito ni tiene forma de alcanzarlo, pero al agregar el item el
+    /// servicio dispara OnCambio y el contador del menú se actualiza solo.
+    /// </summary>
+    private async Task AgregarAlCarritoAsync()
+    {
+        if (producto is null || talleSeleccionado is null)
+        {
+            return;
+        }
+
+        await Carrito.AgregarAsync(producto, talleSeleccionado);
+        agregadoAlCarrito = true;
     }
 }
