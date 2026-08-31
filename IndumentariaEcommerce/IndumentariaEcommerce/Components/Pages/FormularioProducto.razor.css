@@ -1,0 +1,41 @@
+/* Ancho máximo del formulario. Un campo de texto de 1200px de ancho es
+   incómodo de completar y se ve mal: el ojo no encuentra el principio de la
+   línea al volver. */
+form {
+    max-width: 820px;
+}
+
+h1 {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+}
+
+.breadcrumb {
+    --bs-breadcrumb-divider-color:     var(--tinta-suave);
+    --bs-breadcrumb-item-active-color: var(--tinta-suave);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* Las ayudas van más chicas que la etiqueta: son secundarias al campo. */
+.form-text {
+    font-size: 0.78rem;
+    color: var(--tinta-suave);
+}
+
+/* ValidationSummary dibuja un <ul class="validation-errors">. Sin esto queda
+   con las viñetas y el sangrado por defecto del navegador dentro del alert. */
+.validation-errors {
+    margin: 0;
+    padding-left: 1.15rem;
+    font-size: 0.9rem;
+}
+
+/* Separa las acciones del último campo: guardar y cancelar no son un campo
+   más del formulario. */
+.acciones {
+    margin-top: 0.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--linea);
+}

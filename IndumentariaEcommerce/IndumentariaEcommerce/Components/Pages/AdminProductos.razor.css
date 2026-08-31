@@ -1,11 +1,55 @@
+/* Encabezado con la misma regla gruesa del catálogo y la portada. */
+.encabezado {
+    border-bottom: 2px solid var(--tinta);
+    padding-bottom: 1rem;
+}
+
+h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+}
+
+/* ---------- Tabla ---------- */
+
+/* Sin líneas verticales y con una regla marcada bajo el encabezado: en una
+   estética de bordes duros, una sola línea fuerte ordena mejor que muchas
+   líneas débiles. */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--linea);
+    margin-bottom: 0;
+}
+
+thead th {
+    border-bottom: 2px solid var(--tinta);
+    padding-bottom: 0.7rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+}
+
+tbody td {
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+    font-size: 0.92rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* El hover se hace acá y no con la clase table-hover de Bootstrap, para
+   usar un tono de la paleta en lugar del gris azulado por defecto. */
+tbody tr:hover {
+    background-color: #EDEBE6;
+}
+
 .celda-imagen {
-    width: 56px;
+    width: 60px;
 }
 
 .miniatura {
-    width: 40px;
-    height: 53px;
+    width: 44px;
+    height: 58px;
     object-fit: cover;
-    border-radius: 4px;
-    background-color: #f8f9fa;
+    border-radius: 0;
+    background-color: #E8E6E1;
 }
