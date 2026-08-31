@@ -1,0 +1,21 @@
+/* Regla gruesa bajo el título: el mismo recurso que separa las secciones de
+   la portada, para que las dos pantallas se lean como el mismo sitio.
+   No se toca el margen inferior: lo pone la clase mb-4 del markup. */
+h1 {
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    border-bottom: 2px solid var(--tinta);
+    padding-bottom: 0.9rem;
+}
+
+/* Línea de resultados. Va como etiqueta chica en mayúscula y no como texto
+   corrido: es un dato, no una frase. Las cifras tabulares evitan que el
+   número salte de ancho al cambiar de página. */
+.resumen {
+    margin-bottom: 1.75rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+    font-variant-numeric: tabular-nums;
+}

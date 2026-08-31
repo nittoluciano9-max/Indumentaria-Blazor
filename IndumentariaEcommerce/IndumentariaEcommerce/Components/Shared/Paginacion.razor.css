@@ -1,0 +1,38 @@
+/* Bootstrap arma la paginación con variables propias, así que se redefinen en
+   el contenedor y heredan a cada .page-link. Sin esto los botones seguirían
+   azules, que es el último resto del tema por defecto. */
+.pagination {
+    --bs-pagination-color:               var(--tinta);
+    --bs-pagination-bg:                  transparent;
+    --bs-pagination-border-color:        var(--linea);
+    --bs-pagination-border-radius:       0;
+    --bs-pagination-padding-x:           0.95rem;
+    --bs-pagination-padding-y:           0.5rem;
+    --bs-pagination-font-size:           0.82rem;
+
+    --bs-pagination-hover-color:         var(--negro);
+    --bs-pagination-hover-bg:            #E7E5E0;
+    --bs-pagination-hover-border-color:  var(--linea);
+
+    --bs-pagination-focus-color:         var(--negro);
+    --bs-pagination-focus-bg:            #E7E5E0;
+    --bs-pagination-focus-box-shadow:    0 0 0 0.2rem rgba(var(--acento-rgb), 0.35);
+
+    /* La página actual es el único elemento naranja de la paginación. */
+    --bs-pagination-active-color:        var(--negro);
+    --bs-pagination-active-bg:           var(--acento);
+    --bs-pagination-active-border-color: var(--acento);
+
+    --bs-pagination-disabled-color:        #A9A6A0;
+    --bs-pagination-disabled-bg:           transparent;
+    --bs-pagination-disabled-border-color: var(--linea);
+
+    gap: 0.35rem;
+}
+
+.page-link {
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+}

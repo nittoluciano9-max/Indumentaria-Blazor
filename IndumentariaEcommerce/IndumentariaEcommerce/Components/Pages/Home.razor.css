@@ -1,31 +1,42 @@
+/* La portada es el único bloque oscuro dentro del contenido.
+   Es una salida deliberada de la regla "oscuro solo en nav y pie": el hero es
+   la declaración de marca, y reutiliza --negro en lugar de sumar un color
+   nuevo a la paleta. Para que respete la regla al pie de la letra alcanza con
+   poner var(--hueso) acá y var(--tinta) en los colores de texto. */
 .portada {
-    background: linear-gradient(135deg, #f5f7f9 0%, #e9edf2 100%);
-    border: 1px solid #dde3ea;
-    border-radius: 8px;
-    padding: 2.75rem 1.75rem;
+    background-color: var(--negro);
+    color: #FFFFFF;
+    padding: 3.5rem 1.75rem;
 }
 
 @media (min-width: 768px) {
     .portada {
-        padding: 4rem 3rem;
+        padding: 5.5rem 3.25rem;
     }
 }
 
+/* El acento aparece una sola vez en el hero, en la etiqueta chica. El botón
+   ya es naranja: dos naranjas grandes competirían entre sí. */
+.portada .rotulo {
+    color: var(--acento);
+}
+
 .portada h1 {
-    font-size: clamp(1.9rem, 5vw, 2.9rem);
-    letter-spacing: -0.02em;
-    max-width: 18ch;
+    font-size: clamp(2.5rem, 8vw, 4.6rem);
+    color: #FFFFFF;
+    max-width: 15ch;
 }
 
 .portada .lead {
-    max-width: 46ch;
-    color: #4a5561;
+    max-width: 44ch;
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: #A7A7B2;
 }
 
-.eyebrow {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: #5a6673;
+/* Regla gruesa como separador de sección: el mismo recurso del encabezado del
+   catálogo, para que las dos pantallas se lean como el mismo sitio. */
+.encabezado-seccion {
+    border-bottom: 2px solid var(--tinta);
+    padding-bottom: 0.85rem;
 }
