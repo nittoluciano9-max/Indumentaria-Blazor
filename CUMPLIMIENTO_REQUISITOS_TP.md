@@ -51,6 +51,16 @@ Además: [componentes reutilizables](#componentes-razor-reutilizables) ·
 **Estado: CUMPLE.** Hay 6 componentes reutilizables en `Components/Shared/`,
 más 6 páginas y 2 de layout.
 
+**Resumen conceptual**
+- **¿Qué es?** Un componente Razor es una pieza de interfaz (`.razor`) que combina HTML y C# y se usa como una etiqueta. Es reutilizable cuando recibe sus datos por parámetros y no depende de una pantalla en particular.
+- **¿Para qué sirve?** Para escribir una parte de la interfaz una sola vez y usarla en varias pantallas.
+- **¿Cómo lo aplicamos?** Hay 6 componentes en `Components/Shared/`. Por ejemplo, `TarjetaProducto` se usa en la portada y en el catálogo, y `Paginacion` en el catálogo y en el panel.
+
+**Cómo explicarlo al profesor**
+> "Separé la interfaz en componentes chicos que reciben datos con `[Parameter]` y avisan lo que pasa con `EventCallback`. Por ejemplo, `Paginacion` no sabe si está en el catálogo o en el panel: recibe la página actual y el total, y devuelve la página elegida. Así se reutiliza sin copiar código."
+
+#### Detalle técnico
+
 **Cómo está hecho.** Ninguno de los seis tiene `@page`: reciben los datos por
 `[Parameter]` y avisan lo que pasa por `EventCallback`. No conocen a su padre,
 y por eso se reutilizan en varias pantallas. Ver la
@@ -87,6 +97,16 @@ cinco páginas.
 ### 2. Formularios con EditForm y validación avanzada
 
 **Estado: CUMPLE.**
+
+**Resumen conceptual**
+- **¿Qué es?** `EditForm` es el formulario de Blazor asociado a un objeto modelo, que valida sus datos antes de enviarlos. La validación avanzada agrega reglas propias a las estándar.
+- **¿Para qué sirve?** Para impedir que se guarden datos incorrectos y mostrarle al usuario qué corregir.
+- **¿Cómo lo aplicamos?** El alta y la edición de productos validan con atributos declarados en `Producto.cs`. Por ejemplo, `S,M,S` en Talles lo rechaza `[TallesValidos]` y " Remera" en Nombre lo rechaza la expresión regular.
+
+**Cómo explicarlo al profesor**
+> "Las reglas están declaradas una sola vez en el modelo con Data Annotations, y el `EditForm` las aplica mediante `DataAnnotationsValidator`. Además de `Required`, `StringLength` y `Range`, hice un atributo propio, `TallesValidos`, y una expresión regular para el nombre. Si algo falla, `OnValidSubmit` no se ejecuta y el producto no se guarda."
+
+#### Detalle técnico
 
 **Cómo está hecho.**
 - El formulario de alta y edición usa `EditForm` con `OnValidSubmit`, que
@@ -146,6 +166,16 @@ y tocar Guardar: aparece el error y no se guarda.
 
 **Estado: CUMPLE.**
 
+**Resumen conceptual**
+- **¿Qué es?** El routing asocia cada URL a un componente mediante `@page`, y los parámetros de ruta toman valores de la URL. La navegación programática cambia de página desde C#.
+- **¿Para qué sirve?** Para que cada producto tenga su propia URL y para redirigir al usuario después de una acción.
+- **¿Cómo lo aplicamos?** `/producto/{Id:int}` abre el detalle del producto con ese Id, y después de guardar un producto `NavigateTo` vuelve al listado del panel.
+
+**Cómo explicarlo al profesor**
+> "Uso `@page` con parámetros tipados, como `{Id:int}`, que Blazor copia a una propiedad `[Parameter]`. El formulario tiene dos rutas, una de alta y otra de edición, y decide qué hacer según llegue o no el `Id`. Al guardar redirijo con `NavigationManager.NavigateTo`."
+
+#### Detalle técnico
+
 **Cómo está hecho.**
 - Rutas con parámetros tipados: `/producto/{Id:int}` y `/admin/productos/{Id:int}/editar`.
 - El formulario declara **dos** `@page`: con `Id` edita, sin `Id` da de alta.
@@ -187,6 +217,16 @@ y tocar Guardar: aparece el error y no se guarda.
 ### 4. State Service con notificación reactiva
 
 **Estado: CUMPLE.**
+
+**Resumen conceptual**
+- **¿Qué es?** Un State Service es un servicio inyectado que guarda un estado compartido entre componentes. La notificación reactiva es un evento que avisa cuando ese estado cambia.
+- **¿Para qué sirve?** Para que varias partes de la pantalla muestren el mismo dato actualizado sin pasárselo entre sí.
+- **¿Cómo lo aplicamos?** `CarritoService` guarda el carrito. Al agregar un producto desde el detalle, el contador del menú se actualiza solo.
+
+**Cómo explicarlo al profesor**
+> "`CarritoService` está registrado como `Scoped`: una instancia por circuito, o sea un carrito por usuario. Cuando cambia dispara el evento `OnCambio`, al que están suscritos `IconoCarrito` y la página `Carrito`, que se redibujan con `InvokeAsync(StateHasChanged)`. Al destruirse se desuscriben en `Dispose`."
+
+#### Detalle técnico
 
 **Cómo está hecho.**
 - `CarritoService` guarda el carrito y avisa cada cambio con el evento
@@ -241,6 +281,16 @@ actualiza aunque `DetalleProducto` no conoce a `IconoCarrito`. Después, F5 en
 
 **Estado: CUMPLE.**
 
+**Resumen conceptual**
+- **¿Qué es?** Es usar etiquetas que describen el rol del contenido (`header`, `nav`, `main`, `aside`, `footer`, `section`) en lugar de usar solo `div`.
+- **¿Para qué sirve?** Para mejorar la accesibilidad y dar al documento una estructura que los navegadores y lectores de pantalla entienden.
+- **¿Cómo lo aplicamos?** `MainLayout` usa `aside` para el menú, `main` para la página y `footer` para el pie. El buscador del panel es un `form role="search"`.
+
+**Cómo explicarlo al profesor**
+> "Armé el layout con etiquetas semánticas: `aside` para el menú lateral, `header` para la marca, `nav` para los enlaces, `main` para el contenido y `footer` para el pie. Las páginas agregan `section` y `nav` con `aria-label`. Uso `div` solo donde el elemento no tiene significado, como la columna que agrupa `main` y `footer`."
+
+#### Detalle técnico
+
 **Cómo está hecho.** El layout usa `aside` para la columna lateral, `header`
 para la marca, `nav` para los enlaces, `main` para el contenido y `footer` como
 pie, fuera de `main`.
@@ -278,6 +328,16 @@ pie, fuera de `main`.
 **Estado: CUMPLE.** Hay 11 archivos `.razor.css`: 9 de componentes propios y 2
 de layout.
 
+**Resumen conceptual**
+- **¿Qué es?** Son estilos escritos en un archivo `.razor.css` que se aplican solo a su componente. Blazor lo logra agregando un atributo único a los elementos.
+- **¿Para qué sirve?** Para que los estilos de un componente no afecten a otros.
+- **¿Cómo lo aplicamos?** Hay 11 archivos `.razor.css`. Por ejemplo, `TarjetaProducto.razor.css` define el aspecto de la tarjeta sin tocar el resto del sitio.
+
+**Cómo explicarlo al profesor**
+> "Cada componente con estilo propio tiene su `.razor.css`. Al compilar, Blazor agrega un atributo como `b-xxxx` a los selectores y a los elementos, y junta todo en `IndumentariaEcommerce.styles.css`. Cuando necesito alcanzar un elemento de un componente hijo, como el `<a>` que dibuja `NavLink`, uso `::deep`."
+
+#### Detalle técnico
+
 **Cómo está hecho.** Cada `Componente.razor.css` se aplica solo a ese
 componente. Blazor agrega un atributo único a los elementos y los reúne en
 `IndumentariaEcommerce.styles.css`.
@@ -313,6 +373,16 @@ hace falta porque el `<a>` lo dibuja el componente hijo `NavLink`.
 
 **Estado: CUMPLE.** Usa Bootstrap 5.3.3, incluido en `wwwroot/lib/bootstrap`.
 
+**Resumen conceptual**
+- **¿Qué es?** Bootstrap 5 es un framework CSS con grilla y componentes listos. Mobile-first significa diseñar primero para celular y agregar ajustes a medida que crece la pantalla.
+- **¿Para qué sirve?** Para que la tienda se vea bien en celular, tablet y escritorio.
+- **¿Cómo lo aplicamos?** La grilla del catálogo muestra 1 tarjeta por fila en celular y hasta 4 en pantallas grandes, con las clases `row-cols-*`.
+
+**Cómo explicarlo al profesor**
+> "Las clases sin prefijo valen para celular y las de `sm`, `md`, `lg` y `xl` se suman al crecer la pantalla. El catálogo va de `row-cols-1` a `row-cols-xl-4`, la tabla del panel usa `table-responsive` y el menú lateral pasa a ser una barra desplegable en celular. Los colores se cambiaron redefiniendo las variables `--bs-*` en `app.css`."
+
+#### Detalle técnico
+
 **Cómo está hecho.** Las clases sin prefijo valen para móvil y los prefijos
 `sm`, `md`, `lg` y `xl` agregan columnas al crecer la pantalla. Las media
 queries propias usan `min-width`, que también es mobile-first.
@@ -346,6 +416,16 @@ el menú lateral se convierte en barra superior desplegable.
 ### 8. JS Interop
 
 **Estado: CUMPLE.**
+
+**Resumen conceptual**
+- **¿Qué es?** JS Interop es el mecanismo de Blazor para llamar a JavaScript desde C#, mediante el servicio `IJSRuntime`.
+- **¿Para qué sirve?** Para usar funciones del navegador que C# no tiene disponibles, como `localStorage`.
+- **¿Cómo lo aplicamos?** El carrito se guarda en `localStorage` y se recupera al recargar la página con F5.
+
+**Cómo explicarlo al profesor**
+> "Hice un script, `almacenamiento.js`, con las funciones `guardar`, `leer` y `borrar` sobre `localStorage`. `CarritoService` las llama con `IJSRuntime` cada vez que cambia el carrito. La lectura se hace en `OnAfterRenderAsync` del primer render, porque durante el prerender todavía no hay navegador."
+
+#### Detalle técnico
 
 **Cómo está hecho.** El carrito se guarda en `localStorage` del navegador
 mediante un módulo JavaScript propio, invocado desde C# con `IJSRuntime`.
@@ -393,6 +473,16 @@ durante el prerender no hay navegador.
 
 **Estado: CUMPLE.**
 
+**Resumen conceptual**
+- **¿Qué es?** EF Core es el ORM de .NET: traduce clases C# a tablas y consultas LINQ a SQL. `DbContextFactory` crea un `DbContext` nuevo cada vez que se le pide.
+- **¿Para qué sirve?** Para acceder a la base SQLite sin escribir SQL a mano y de forma segura en Blazor Server.
+- **¿Cómo lo aplicamos?** `ProductoService` crea un contexto corto para cada operación, por ejemplo al buscar los productos del catálogo.
+
+**Cómo explicarlo al profesor**
+> "Registré `AddDbContextFactory` con `UseSqlite` en lugar de `AddDbContext`. En Blazor Server un `DbContext` scoped viviría todo el circuito y no es thread-safe, así que dos eventos simultáneos podrían romperlo. Con la fábrica, cada método del servicio abre un contexto, consulta y lo libera con `await using`."
+
+#### Detalle técnico
+
 **Cómo está hecho.** Se registra una fábrica de contextos. Cada método de
 `ProductoService` crea un contexto corto con
 `await using var contexto = await _fabrica.CreateDbContextAsync()`.
@@ -431,6 +521,16 @@ solapados lo romperían. Es la pregunta más probable de la defensa.
 
 **Estado: CUMPLE.** `Categoria` (1) se relaciona con `Producto` (N).
 
+**Resumen conceptual**
+- **¿Qué es?** Son dos clases del modelo que EF Core guarda como tablas vinculadas por una clave foránea.
+- **¿Para qué sirve?** Para representar que cada producto pertenece a una categoría.
+- **¿Cómo lo aplicamos?** Una `Categoria` tiene muchos `Producto`, y cada producto guarda su `CategoriaId`. Por ejemplo, una remera pertenece a la categoría Remeras.
+
+**Cómo explicarlo al profesor**
+> "`Producto` tiene `CategoriaId` como clave foránea y `Categoria` como navegación, y `Categoria` tiene la colección `Productos`. En `AppDbContext` configuré la relación con `HasOne`, `WithMany` y `HasForeignKey`, y `OnDelete(Restrict)` para que borrar una categoría no borre sus productos. Al consultar uso `Include` para traer la categoría."
+
+#### Detalle técnico
+
 **Evidencia.**
 - [Categoria.cs](IndumentariaEcommerce/IndumentariaEcommerce/Models/Categoria.cs): `ICollection<Producto> Productos`.
 - [Producto.cs](IndumentariaEcommerce/IndumentariaEcommerce/Models/Producto.cs): `CategoriaId` y `Categoria`.
@@ -462,6 +562,16 @@ solapados lo romperían. Es la pregunta más probable de la defensa.
 ### 11. Migraciones versionadas y datos de seed
 
 **Estado: CUMPLE.** Hay 2 migraciones, 5 categorías y 30 productos.
+
+**Resumen conceptual**
+- **¿Qué es?** Una migración es código generado que describe cómo cambiar la base para que coincida con el modelo. El seed son los datos iniciales que se insertan con las migraciones.
+- **¿Para qué sirve?** Para que cualquiera que clone el repositorio obtenga la misma base, con datos de prueba.
+- **¿Cómo lo aplicamos?** Dos migraciones crean las tablas y cargan 5 categorías y 30 productos, y la aplicación las aplica sola al arrancar.
+
+**Cómo explicarlo al profesor**
+> "Los datos iniciales están en `DatosSemilla` con `HasData`. Las migraciones se generan con `dotnet ef migrations add` y se versionan en Git; la base no. Al arrancar, `Database.Migrate()` crea la base si no existe y aplica las migraciones pendientes."
+
+#### Detalle técnico
 
 **Evidencia.**
 - [DatosSemilla.cs](IndumentariaEcommerce/IndumentariaEcommerce/Data/DatosSemilla.cs): `HasData`, aplicado desde [AppDbContext.cs](IndumentariaEcommerce/IndumentariaEcommerce/Data/AppDbContext.cs) — línea 56.
@@ -497,6 +607,16 @@ respondió que el modelo no tiene cambios sin migrar.
 ### 12. CRUD completo con paginación y búsqueda
 
 **Estado: CUMPLE.**
+
+**Resumen conceptual**
+- **¿Qué es?** CRUD son las cuatro operaciones básicas sobre datos: crear, leer, actualizar y eliminar. La paginación divide los resultados en páginas y la búsqueda los filtra por texto.
+- **¿Para qué sirve?** Para administrar el catálogo completo desde la aplicación sin que los listados se vuelvan lentos o interminables.
+- **¿Cómo lo aplicamos?** El panel lista los productos de a 10, busca por nombre y permite alta, edición y baja con confirmación.
+
+**Cómo explicarlo al profesor**
+> "`ProductoService` tiene un método por operación: `BuscarAsync`, `ObtenerPorIdAsync`, `CrearAsync`, `ActualizarAsync` y `EliminarAsync`. La búsqueda usa `EF.Functions.Like` y la paginación `Skip` y `Take`, contando el total antes de recortar. Al cambiar el texto de búsqueda se vuelve a la página 1."
+
+#### Detalle técnico
 
 **Evidencia** en [ProductoService.cs](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs):
 
@@ -566,16 +686,25 @@ a la página 1 con los resultados. Después crear, editar y eliminar un producto
 
 **Estado: CUMPLE.**
 
+**Resumen conceptual**
+- **¿Qué es?** Git registra el historial de cambios y GitHub lo publica en línea. Conventional Commits es una convención para los mensajes: un tipo, un alcance opcional y una descripción.
+- **¿Para qué sirve?** Para que el historial se entienda y se pueda ver qué cambió y por qué.
+- **¿Cómo lo aplicamos?** El repositorio es público en GitHub y cada commit sigue el formato, por ejemplo `feat(validaciones): agregar expresion regular y actualizar documentacion`.
+
+**Cómo explicarlo al profesor**
+> "Cada commit es una unidad de trabajo con un mensaje `tipo(alcance): descripción`, en español y en imperativo. Uso `feat` para funcionalidades, `fix` para correcciones y `docs`, `style`, `refactor` y `chore` para el resto. El `.gitignore` deja afuera la base de datos y los archivos de compilación."
+
+#### Detalle técnico
+
 **Evidencia verificada.**
 - Repositorio público: `https://github.com/nittoluciano9-max/Indumentaria-Blazor`, rama `main`.
-- Los 36 commits publicados siguen el formato `tipo(alcance): descripción`.
+- Los 38 commits publicados, incluido el de esta versión de la guía, siguen el formato `tipo(alcance): descripción`.
   Se usan los tipos `feat`, `fix`, `style`, `refactor`, `docs` y `chore`.
 - Las bases de datos y los artefactos de compilación están excluidos en [.gitignore](.gitignore).
 
-**Estado de la publicación.** Los commits anteriores, incluidos los ajustes
-técnicos y la documentación, ya están publicados en GitHub. Las modificaciones
-actuales de esta guía todavía están pendientes de commit, que se hará también
-con Conventional Commits.
+**Estado de la publicación.** Todo el trabajo está publicado en GitHub, en la
+rama `main`: el código, los ajustes técnicos, la validación con expresión
+regular y la documentación, incluida esta guía.
 
 **Qué mostrar.** `git log --oneline` o la pestaña Git Changes / Git Repository
 de Visual Studio.
@@ -593,6 +722,16 @@ de Visual Studio.
 
 **Estado: PENDIENTE — fuera del alcance de esta entrega.**
 
+**Resumen conceptual**
+- **¿Qué es?** CI (integración continua) compila y prueba el código automáticamente en cada push, y CD (despliegue continuo) lo publica automáticamente. GitHub Actions es el servicio de GitHub que ejecuta esos procesos.
+- **¿Para qué sirve?** Para detectar errores apenas se sube el código y publicar sin pasos manuales.
+- **¿Cómo lo aplicamos?** No está implementado en esta entrega. Un workflow en `.github/workflows/` ejecutaría `dotnet build` en cada push.
+
+**Cómo explicarlo al profesor**
+> "CI/CD quedó fuera del alcance acordado para esta entrega, junto con el despliegue. Para implementarlo agregaría un archivo YAML en `.github/workflows/` que, en cada push, restaure las dependencias, compile y, cuando haya pruebas, las ejecute. La parte de repositorio e historial con Conventional Commits sí está cumplida."
+
+#### Detalle técnico
+
 - La parte de **Git y GitHub** está cumplida (requisito 13).
 - La parte de **CI/CD no está implementada.** La carpeta `.github/workflows/`
   está vacía y no hay ningún workflow versionado, así que GitHub no ejecuta
@@ -609,6 +748,16 @@ hay ningún archivo en esa carpeta, GitHub no ejecuta nada.
 
 **Estado: CUMPLE.**
 
+**Resumen conceptual**
+- **¿Qué es?** Es el archivo de presentación del repositorio, que GitHub muestra en su página principal.
+- **¿Para qué sirve?** Para que cualquiera entienda y ejecute el proyecto sin leer el código.
+- **¿Cómo lo aplicamos?** `README.md` describe la tienda, las tecnologías, la estructura, cómo ejecutarla con Visual Studio o `dotnet` y las limitaciones conocidas.
+
+**Cómo explicarlo al profesor**
+> "El README explica qué es el proyecto, con qué tecnologías y versiones está hecho y cómo ejecutarlo desde Visual Studio o la línea de comandos. También documenta la base SQLite y las limitaciones conocidas. Para el detalle técnico remite a `GUIA_TECNICA.md`."
+
+#### Detalle técnico
+
 [README.md](README.md) incluye descripción, tecnologías con versiones,
 características, estructura, requisitos previos, ejecución con Visual Studio y
 con `dotnet`, configuración de SQLite y limitaciones conocidas. Lo complementa
@@ -623,6 +772,16 @@ con `dotnet`, configuración de SQLite y limitaciones conocidas. Lo complementa
 ### 16. Aplicación desplegada en URL pública
 
 **Estado: PENDIENTE — excluido por el docente para esta entrega.**
+
+**Resumen conceptual**
+- **¿Qué es?** Es publicar la aplicación en un servidor accesible desde internet, con una URL pública.
+- **¿Para qué sirve?** Para que cualquiera pueda usarla sin instalar nada.
+- **¿Cómo lo aplicamos?** No se desplegó en esta entrega: la aplicación se ejecuta localmente en `https://localhost:7220`.
+
+**Cómo explicarlo al profesor**
+> "El despliegue quedó fuera del alcance de esta entrega. Para publicarla necesitaría un hosting compatible con .NET 9 y con WebSockets, porque Blazor Server mantiene un circuito por SignalR, y resolver dónde se guarda el archivo SQLite. Localmente funciona completa."
+
+#### Detalle técnico
 
 No hay despliegue ni URL pública. La aplicación se ejecuta localmente
 (`https://localhost:7220`).
