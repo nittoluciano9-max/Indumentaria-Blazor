@@ -10,7 +10,7 @@ namespace IndumentariaEcommerce.Services;
 /// filtrado y paginación existe en un solo lugar.
 ///
 /// Recibe una IDbContextFactory y no un AppDbContext: crea un contexto corto
-/// por consulta y lo descarta (ver CLAUDE.md, sección "Acceso a datos").
+/// por consulta y lo descarta (ver GUIA_TECNICA.md, sección 12 "EF Core y DbContextFactory").
 /// </summary>
 public class ProductoService
 {

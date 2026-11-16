@@ -485,3 +485,6 @@ $RECYCLE.BIN/
 *.db
 *.db-shm
 *.db-wal
+
+# Convenciones locales para herramientas de desarrollo (no forman parte de la entrega)
+/CLAUDE.md

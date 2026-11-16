@@ -6,7 +6,7 @@ namespace IndumentariaEcommerce.Data;
 /// <summary>
 /// Contexto de EF Core: traduce las clases de Models a tablas de SQLite.
 /// Se crea a través de IDbContextFactory, nunca inyectado directamente en los
-/// componentes (ver CLAUDE.md, sección "Acceso a datos").
+/// componentes (ver GUIA_TECNICA.md, sección 12 "EF Core y DbContextFactory").
 /// </summary>
 public class AppDbContext : DbContext
 {
