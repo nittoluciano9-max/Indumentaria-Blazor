@@ -1,8 +1,10 @@
 # Cumplimiento de requisitos — TP Integrador Blazor
 
 Relaciona cada requisito de la consigna con su evidencia en el código. Los
-enlaces son relativos a la raíz del repositorio. En GitHub, los que terminan en
-`#Lnn` abren el archivo en esa línea; en Visual Studio abren el archivo.
+enlaces son relativos a la raíz del repositorio y abren el archivo tanto en
+GitHub como desde la vista previa Markdown de Visual Studio. Los números de
+línea figuran como texto al lado de cada enlace: una vez abierto el archivo en
+Visual Studio, se ubican con **Ctrl+G** (Ir a línea).
 
 Las líneas citadas corresponden al estado del código al 16/11/2026.
 
@@ -64,6 +66,24 @@ y en el panel
 parámetro obligatorio. `Cargando` reemplazó un bloque que estaba copiado en
 cinco páginas.
 
+**Referencias explicadas.**
+- `Paginacion.razor` dibuja los botones Anterior, números y Siguiente. Recibe
+  `PaginaActual` y `TotalPaginas` y, al hacer clic, devuelve la página elegida
+  con `OnCambioPagina.InvokeAsync(pagina)`.
+- `Catalogo.razor` y `AdminProductos.razor` son los padres: guardan en qué
+  página están, se la pasan a `Paginacion` y, cuando reciben el aviso, vuelven a
+  pedir los datos al servicio.
+
+**Cómo se relacionan.**
+1. El padre (por ejemplo `Catalogo`) consulta `ProductoService` y obtiene la
+   página actual y el total de páginas.
+2. Se los pasa a `<Paginacion>` como parámetros.
+3. El usuario toca un número: `Paginacion` no cambia nada por su cuenta, solo
+   dispara el `EventCallback` con ese número.
+4. El padre recibe el número, actualiza su variable de página y vuelve a
+   consultar el servicio.
+5. Blazor redibuja al padre y, con él, a `Paginacion` con los valores nuevos.
+
 ### 2. Formularios con EditForm y validación avanzada
 
 **Estado: CUMPLE.**
@@ -77,11 +97,42 @@ cinco páginas.
   talles vacíos, con espacios o repetidos.
 
 **Evidencia.**
-- [FormularioProducto.razor#L38-L40](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/FormularioProducto.razor#L38-L40): `EditForm`, `DataAnnotationsValidator` y `ValidationSummary`.
-- [Producto.cs](IndumentariaEcommerce/IndumentariaEcommerce/Models/Producto.cs): `Required`, `StringLength` y `Range`.
-  - [Línea 41](IndumentariaEcommerce/IndumentariaEcommerce/Models/Producto.cs#L41): `[TallesValidos]`.
-  - [Línea 48](IndumentariaEcommerce/IndumentariaEcommerce/Models/Producto.cs#L48): `[Range(1, …)]`, que obliga a elegir una categoría.
+- [FormularioProducto.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/FormularioProducto.razor) — líneas 38 a 40: `EditForm`, `DataAnnotationsValidator` y `ValidationSummary`.
+- [Producto.cs](IndumentariaEcommerce/IndumentariaEcommerce/Models/Producto.cs): `Required`, `StringLength`, `Range` y `RegularExpression`.
+  - Línea 19: `[RegularExpression(@"^\S(?:.*\S)?$")]` sobre `Nombre`.
+  - [Línea 44](IndumentariaEcommerce/IndumentariaEcommerce/Models/Producto.cs): `[TallesValidos]`.
+  - [Línea 51](IndumentariaEcommerce/IndumentariaEcommerce/Models/Producto.cs): `[Range(1, …)]`, que obliga a elegir una categoría.
 - [TallesValidosAttribute.cs](IndumentariaEcommerce/IndumentariaEcommerce/Models/Validaciones/TallesValidosAttribute.cs): hereda de `ValidationAttribute` y sobrescribe `IsValid`.
+
+**Referencias explicadas.**
+- **`EditForm` (líneas 38 a 40):** envuelve el formulario y lo conecta con el
+  objeto `modelo`. `DataAnnotationsValidator` lee los atributos de `Producto` y
+  `ValidationSummary` lista todos los errores juntos arriba del formulario.
+- **`Producto.cs`:** las reglas viven en el modelo, no en la pantalla.
+  `Required` exige un valor, `StringLength` limita el largo y `Range` fija un
+  mínimo y un máximo.
+- **Línea 19:** expresión regular sobre `Nombre`.
+  - `^\S` exige que el primer carácter no sea un espacio.
+  - `(?:.*\S)?$` exige lo mismo para el último y permite cualquier cosa en el
+    medio.
+  - "Remera negra" es válido; " Remera negra" y "Remera negra " no.
+  - El vacío lo controla `[Required]`.
+- **Línea 44:** aplica la validación propia a la propiedad `Talles`.
+- **Línea 51:** `Range(1, …)` sobre `CategoriaId`. El valor 0 corresponde a la
+  opción vacía del desplegable ("Seleccioná…") y no es un Id válido, así que obliga a elegir.
+- **`TallesValidosAttribute.cs`:** `IsValid` recibe el texto, lo separa por
+  comas con `Split(',')` y devuelve `false` si alguna parte está vacía, tiene
+  caracteres no permitidos o se repite. Devolver `false` es lo que hace aparecer
+  el mensaje de error.
+
+**Cómo se relacionan.**
+1. `FormularioProducto` crea un `EditForm` sobre un objeto `Producto`.
+2. Al tocar Guardar, `DataAnnotationsValidator` recorre los atributos
+   declarados en `Producto.cs`, incluido `[TallesValidos]`.
+3. Para `Talles`, .NET llama a `TallesValidosAttribute.IsValid`.
+4. Si alguna regla falla, los errores aparecen en `ValidationSummary` y en cada
+   `ValidationMessage`, y `OnValidSubmit` **no** se ejecuta.
+5. Si todo es válido, se ejecuta `GuardarAsync`, que llama al servicio.
 
 **Qué mostrar.** En Administración → Nuevo producto, escribir `S,M,S` en Talles
 y tocar Guardar: aparece el error y no se guarda.
@@ -101,10 +152,32 @@ y tocar Guardar: aparece el error y no se guarda.
 - Después de guardar se navega por código con `NavigationManager`.
 
 **Evidencia.**
-- [DetalleProducto.razor#L3](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/DetalleProducto.razor#L3): ruta `/producto/{Id:int}`.
-- [FormularioProducto.razor#L5-L6](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/FormularioProducto.razor#L5-L6): las dos rutas del formulario.
-- [FormularioProducto.razor#L193](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/FormularioProducto.razor#L193): `NavigateTo`.
+- [DetalleProducto.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/DetalleProducto.razor) — línea 3: ruta `/producto/{Id:int}`.
+- [FormularioProducto.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/FormularioProducto.razor) — líneas 5 a 6: las dos rutas del formulario.
+- [FormularioProducto.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/FormularioProducto.razor) — línea 193: `NavigateTo`.
 - [NavMenu.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/NavMenu.razor): `NavLink` con `Match="NavLinkMatch.All"`.
+
+**Referencias explicadas.**
+- **`DetalleProducto.razor`, línea 3:** `@page "/producto/{Id:int}"` toma el
+  número de la URL y lo guarda en la propiedad `[Parameter] public int Id`.
+- **`FormularioProducto.razor`, líneas 5 a 6:** dos `@page` para un mismo
+  componente. `/admin/productos/nuevo` deja `Id` en `null` (alta) y
+  `/admin/productos/{Id:int}/editar` lo completa (edición). La propiedad
+  `EsEdicion` decide según eso.
+- **`FormularioProducto.razor`, línea 193:** `NavigateTo("/admin/productos")`
+  cambia de página desde C#, sin que el usuario haga clic en un enlace.
+- **`NavMenu.razor`:** `NavLink` es un enlace que agrega la clase `active`
+  cuando la URL coincide. `NavLinkMatch.All` exige coincidencia exacta, para
+  que "Inicio" (`/`) no quede resaltado en todas las páginas.
+
+**Cómo se relacionan.**
+1. El usuario abre `/admin/productos/5/editar`: el router de Blazor elige
+   `FormularioProducto` y asigna `Id = 5`.
+2. `OnParametersSetAsync` ve que hay `Id` y pide el producto a
+   `ProductoService.ObtenerPorIdAsync`.
+3. Al guardar, el formulario llama a `ActualizarAsync` (o a `CrearAsync` si no
+   había `Id`).
+4. Terminado el guardado, `NavigationManager.NavigateTo` lleva al listado.
 
 **Qué explicar.**
 - La restricción `:int` hace que `/producto/abc` dé 404.
@@ -122,10 +195,34 @@ y tocar Guardar: aparece el error y no se guarda.
   redibujan con `InvokeAsync(StateHasChanged)` y se desuscriben en `Dispose`.
 
 **Evidencia.**
-- [CarritoService.cs#L43](IndumentariaEcommerce/IndumentariaEcommerce/Services/CarritoService.cs#L43): `public event Action? OnCambio`.
-- [Program.cs#L38](IndumentariaEcommerce/IndumentariaEcommerce/Program.cs#L38): registrado como `Scoped`.
-- [IconoCarrito.razor#L23](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/IconoCarrito.razor#L23) y [#L51](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/IconoCarrito.razor#L51): suscripción y desuscripción.
-- [Carrito.razor#L133](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Carrito.razor#L133) y [#L144](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Carrito.razor#L144): ídem.
+- [CarritoService.cs](IndumentariaEcommerce/IndumentariaEcommerce/Services/CarritoService.cs) — línea 43: `public event Action? OnCambio`.
+- [Program.cs](IndumentariaEcommerce/IndumentariaEcommerce/Program.cs) — línea 38: registrado como `Scoped`.
+- [IconoCarrito.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/IconoCarrito.razor) — línea 23 y [línea 51](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/IconoCarrito.razor): suscripción y desuscripción.
+- [Carrito.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Carrito.razor) — línea 133 y [línea 144](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Carrito.razor): ídem.
+
+**Referencias explicadas.**
+- **`CarritoService.cs`, línea 43:** `OnCambio` es un evento de C#. El servicio
+  lo dispara después de agregar, quitar, cambiar cantidades o vaciar, y no
+  necesita saber quién lo escucha.
+- **`Program.cs`, línea 38:** `AddScoped<CarritoService>()` crea una instancia
+  del servicio por circuito, es decir por pestaña conectada.
+- **`IconoCarrito.razor`, línea 23:** `OnCambio += AlCambiarElCarrito`
+  suscribe el componente. El handler ejecuta `InvokeAsync(StateHasChanged)`
+  para redibujar el contador.
+- **`IconoCarrito.razor`, línea 51:** en `Dispose`, `OnCambio -= …` lo
+  desuscribe cuando el componente se destruye.
+- **`Carrito.razor`, líneas 133 y 144:** el mismo patrón en la página del
+  carrito, para que se redibuje cuando el carrito se carga desde
+  `localStorage` después de un F5.
+
+**Cómo se relacionan.**
+1. `DetalleProducto` llama a `CarritoService.AgregarAsync`.
+2. El servicio actualiza su lista interna y dispara `OnCambio`.
+3. Todos los componentes suscritos (`IconoCarrito` y, si está abierta, la
+   página `Carrito`) ejecutan su handler.
+4. Cada handler llama a `InvokeAsync(StateHasChanged)` y Blazor redibuja ese
+   componente con los datos nuevos.
+5. Al salir de una página, `Dispose` quita la suscripción.
 
 **Qué mostrar.** Agregar un producto desde el detalle: el contador del menú se
 actualiza aunque `DetalleProducto` no conoce a `IconoCarrito`. Después, F5 en
@@ -149,9 +246,27 @@ para la marca, `nav` para los enlaces, `main` para el contenido y `footer` como
 pie, fuera de `main`.
 
 **Evidencia.**
-- [MainLayout.razor#L9](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/MainLayout.razor#L9) (`aside`), [#L14](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/MainLayout.razor#L14) (`main`) y [#L19](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/MainLayout.razor#L19) (`footer`).
-- [NavMenu.razor#L3](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/NavMenu.razor#L3): `header`.
+- [MainLayout.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/MainLayout.razor) — línea 9 (`aside`), [línea 14](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/MainLayout.razor) (`main`) y [línea 19](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/MainLayout.razor) (`footer`).
+- [NavMenu.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/NavMenu.razor) — línea 3: `header`.
 - En las páginas: `section` en [Home.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Home.razor), `nav aria-label` en la paginación y los breadcrumbs, y `form role="search"` en el panel.
+
+**Referencias explicadas.**
+- **`MainLayout.razor`:** es la plantilla común a todas las páginas.
+  - `aside` (línea 9) contiene el menú lateral.
+  - `main` (línea 14) contiene `@Body`, donde Blazor inserta la página actual.
+  - `footer` (línea 19) es el pie.
+- **`NavMenu.razor`, línea 3:** `header` agrupa la marca de la tienda y el
+  botón del menú móvil.
+- **Páginas:** `section` agrupa bloques con título propio. `aria-label` le da
+  nombre a cada `nav` para los lectores de pantalla. `role="search"` identifica
+  el formulario como buscador.
+
+**Cómo se relacionan.**
+1. Toda página con `@page` se dibuja dentro de `MainLayout`.
+2. `MainLayout` incluye `NavMenu` dentro del `aside` y la página dentro de
+   `main`.
+3. Cada página agrega su propia estructura (`section`, `nav`, `form`) dentro
+   de `main`.
 
 **Qué mostrar.** F12 → Elements: la estructura `aside`, `main` y `footer`.
 
@@ -169,12 +284,29 @@ componente. Blazor agrega un atributo único a los elementos y los reúne en
 
 **Evidencia.**
 - Archivos: [TarjetaProducto.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/TarjetaProducto.razor.css), [Paginacion.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/Paginacion.razor.css), [IconoCarrito.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/IconoCarrito.razor.css), [Home.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Home.razor.css), [Catalogo.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Catalogo.razor.css), [DetalleProducto.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/DetalleProducto.razor.css), [Carrito.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Carrito.razor.css), [AdminProductos.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/AdminProductos.razor.css), [FormularioProducto.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/FormularioProducto.razor.css), [MainLayout.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/MainLayout.razor.css) y [NavMenu.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/NavMenu.razor.css).
-- [App.razor#L13](IndumentariaEcommerce/IndumentariaEcommerce/Components/App.razor#L13): enlace al bundle `IndumentariaEcommerce.styles.css`.
+- [App.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/App.razor) — línea 13: enlace al bundle `IndumentariaEcommerce.styles.css`.
+
+**Referencias explicadas.**
+- **Archivos `.razor.css`:** cada uno lleva el mismo nombre que su componente.
+  Al compilar, Blazor les agrega un atributo único (por ejemplo `b-3x7k…`) a los
+  selectores y a los elementos de ese componente, así que una regla de
+  `TarjetaProducto` no afecta a otros componentes.
+- **`App.razor`, línea 13:** incluye `IndumentariaEcommerce.styles.css`, el
+  archivo que Blazor genera reuniendo todos los `.razor.css`. Sin esa línea, los
+  estilos aislados no se cargarían.
+
+**Cómo se relacionan.**
+1. Se escribe CSS en `Componente.razor.css`.
+2. Al compilar, Blazor reescribe cada selector agregándole el atributo del
+   componente.
+3. Todo se junta en `IndumentariaEcommerce.styles.css`.
+4. `App.razor` carga ese archivo y el navegador aplica cada regla solo a los
+   elementos que tienen el atributo correspondiente.
 
 **Qué mostrar.** F12: un elemento de la tarjeta con su atributo `b-xxxxxxxx`.
 
 **Qué explicar.** `::deep`
-([NavMenu.razor.css#L79](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/NavMenu.razor.css#L79))
+([NavMenu.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/NavMenu.razor.css) — línea 79)
 hace falta porque el `<a>` lo dibuja el componente hijo `NavLink`.
 
 ### 7. Diseño responsive con Bootstrap 5 (mobile-first)
@@ -186,10 +318,27 @@ hace falta porque el `<a>` lo dibuja el componente hijo `NavLink`.
 queries propias usan `min-width`, que también es mobile-first.
 
 **Evidencia.**
-- [Catalogo.razor#L31](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Catalogo.razor#L31): `row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4`.
+- [Catalogo.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Catalogo.razor) — línea 31: `row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4`.
 - [AdminProductos.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/AdminProductos.razor): `table-responsive`.
 - [FormularioProducto.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/FormularioProducto.razor): `col-6 col-md-3`.
 - [app.css](IndumentariaEcommerce/IndumentariaEcommerce/wwwroot/app.css): la paleta, que redefine variables `--bs-*`.
+
+**Referencias explicadas.**
+- **`Catalogo.razor`, línea 31:** `row-cols-*` indica cuántas tarjetas van por
+  fila: 1 en celular, 2 desde `sm`, 3 desde `lg` y 4 desde `xl`.
+- **`AdminProductos.razor`:** `table-responsive` agrega desplazamiento
+  horizontal a la tabla en pantallas angostas, en lugar de romper el diseño.
+- **`FormularioProducto.razor`:** `col-6 col-md-3` ocupa media fila en
+  celular y un cuarto de fila desde `md`.
+- **`app.css`:** cambia los colores de Bootstrap redefiniendo sus variables
+  CSS (`--bs-*`), sin modificar los archivos de Bootstrap.
+
+**Cómo se relacionan.**
+1. `App.razor` carga primero Bootstrap y después `app.css`.
+2. `app.css` ajusta la paleta mediante las variables de Bootstrap.
+3. Cada página usa las clases de grilla de Bootstrap para acomodarse al ancho
+   de la pantalla.
+4. Los `.razor.css` agregan solo lo que Bootstrap no resuelve.
 
 **Qué mostrar.** F12 → modo dispositivo: el catálogo pasa de 1 a 4 columnas y
 el menú lateral se convierte en barra superior desplegable.
@@ -203,9 +352,33 @@ mediante un módulo JavaScript propio, invocado desde C# con `IJSRuntime`.
 
 **Evidencia.**
 - [almacenamiento.js](IndumentariaEcommerce/IndumentariaEcommerce/wwwroot/js/almacenamiento.js): `guardar`, `leer` y `borrar`, cada una con `try/catch`.
-- [App.razor#L21](IndumentariaEcommerce/IndumentariaEcommerce/Components/App.razor#L21): carga del script.
-- [CarritoService.cs#L76](IndumentariaEcommerce/IndumentariaEcommerce/Services/CarritoService.cs#L76) (leer), [#L99](IndumentariaEcommerce/IndumentariaEcommerce/Services/CarritoService.cs#L99) (borrar) y [#L204](IndumentariaEcommerce/IndumentariaEcommerce/Services/CarritoService.cs#L204) (guardar).
-- [IconoCarrito.razor#L35](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/IconoCarrito.razor#L35): rehidratación en `OnAfterRenderAsync(firstRender)`.
+- [App.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/App.razor) — línea 21: carga del script.
+- [CarritoService.cs](IndumentariaEcommerce/IndumentariaEcommerce/Services/CarritoService.cs) — línea 76 (leer), [línea 99](IndumentariaEcommerce/IndumentariaEcommerce/Services/CarritoService.cs) (borrar) y [línea 204](IndumentariaEcommerce/IndumentariaEcommerce/Services/CarritoService.cs) (guardar).
+- [IconoCarrito.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/IconoCarrito.razor) — línea 35: rehidratación en `OnAfterRenderAsync(firstRender)`.
+
+**Referencias explicadas.**
+- **`almacenamiento.js`:** define el objeto global `window.almacenamiento` con
+  tres funciones sobre `localStorage`. El `try/catch` evita que la aplicación
+  falle si el navegador bloquea el almacenamiento.
+- **`App.razor`, línea 21:** carga el script en la página para que esas
+  funciones existan antes de llamarlas desde C#.
+- **`CarritoService.cs`, línea 76:** `InvokeAsync<string?>("almacenamiento.leer", …)`
+  trae el carrito guardado como texto JSON.
+- **`CarritoService.cs`, línea 99:** si el JSON está dañado, llama a `borrar`
+  y se empieza con el carrito vacío.
+- **`CarritoService.cs`, línea 204:** después de cada cambio, convierte la lista
+  a JSON y llama a `guardar`.
+- **`IconoCarrito.razor`, línea 35:** en el primer render llama a
+  `InicializarAsync`, que lee lo guardado. Como el ícono está en el menú, esto
+  ocurre en cualquier página por la que entre el usuario.
+
+**Cómo se relacionan.**
+1. El navegador carga `almacenamiento.js` desde `App.razor`.
+2. En el primer render, `IconoCarrito` llama a `CarritoService.InicializarAsync`.
+3. El servicio usa `IJSRuntime` para ejecutar `almacenamiento.leer`, convierte
+   el JSON en una lista y dispara `OnCambio`.
+4. Cada vez que el carrito cambia, el servicio llama a `almacenamiento.guardar`.
+5. Después de un F5 se repite el paso 2 y el carrito se recupera.
 
 **Qué mostrar.** F12 → Application → Local Storage → clave `carrito`.
 
@@ -225,10 +398,30 @@ durante el prerender no hay navegador.
 `await using var contexto = await _fabrica.CreateDbContextAsync()`.
 
 **Evidencia.**
-- [Program.cs#L27](IndumentariaEcommerce/IndumentariaEcommerce/Program.cs#L27): `AddDbContextFactory<AppDbContext>` con `UseSqlite`.
+- [Program.cs](IndumentariaEcommerce/IndumentariaEcommerce/Program.cs) — línea 27: `AddDbContextFactory<AppDbContext>` con `UseSqlite`.
 - [ProductoService.cs](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs): recibe `IDbContextFactory<AppDbContext>`.
 - [appsettings.json](IndumentariaEcommerce/IndumentariaEcommerce/appsettings.json): cadena `ConexionSqlite`.
 - [IndumentariaEcommerce.csproj](IndumentariaEcommerce/IndumentariaEcommerce/IndumentariaEcommerce.csproj): EF Core Sqlite 9.0.19.
+
+**Referencias explicadas.**
+- **`Program.cs`, línea 27:** registra la fábrica en lugar del contexto.
+  `UseSqlite` indica que la base es SQLite y toma la cadena de conexión de la
+  configuración.
+- **`ProductoService.cs`:** recibe `IDbContextFactory<AppDbContext>` en el
+  constructor. Cada método crea su propio contexto y lo libera al terminar
+  (`await using`).
+- **`appsettings.json`:** `ConexionSqlite` vale `Data Source=indumentaria.db`,
+  el archivo de la base.
+- **`.csproj`:** declara el paquete `Microsoft.EntityFrameworkCore.Sqlite`, que
+  aporta EF Core y el proveedor para SQLite.
+
+**Cómo se relacionan.**
+1. Al arrancar, `Program.cs` lee `ConexionSqlite` y registra la fábrica.
+2. Blazor crea `ProductoService` y le entrega la fábrica.
+3. Cuando un componente pide datos, el servicio crea un `AppDbContext`, hace la
+   consulta y lo descarta.
+4. Así cada operación usa un contexto propio y dos eventos simultáneos nunca
+   comparten el mismo.
 
 **Qué explicar.** En Blazor Server un `DbContext` *scoped* viviría todo el
 circuito, durante minutos u horas. Además no es thread-safe: dos eventos
@@ -241,7 +434,26 @@ solapados lo romperían. Es la pregunta más probable de la defensa.
 **Evidencia.**
 - [Categoria.cs](IndumentariaEcommerce/IndumentariaEcommerce/Models/Categoria.cs): `ICollection<Producto> Productos`.
 - [Producto.cs](IndumentariaEcommerce/IndumentariaEcommerce/Models/Producto.cs): `CategoriaId` y `Categoria`.
-- [AppDbContext.cs#L44-L47](IndumentariaEcommerce/IndumentariaEcommerce/Data/AppDbContext.cs#L44-L47): `HasOne` / `WithMany` / `HasForeignKey` / `OnDelete(Restrict)`.
+- [AppDbContext.cs](IndumentariaEcommerce/IndumentariaEcommerce/Data/AppDbContext.cs) — líneas 44 a 47: `HasOne` / `WithMany` / `HasForeignKey` / `OnDelete(Restrict)`.
+
+**Referencias explicadas.**
+- **`Categoria.cs`:** la colección `Productos` es la propiedad de navegación
+  del lado "uno": desde una categoría se llega a sus productos.
+- **`Producto.cs`:** `CategoriaId` es la clave foránea (el número que se guarda
+  en la tabla). `Categoria` es la navegación del lado "muchos": desde un
+  producto se llega a su categoría.
+- **`AppDbContext.cs`, líneas 44 a 47:** declaran la relación de forma
+  explícita. Cada producto tiene una categoría (`HasOne`), cada categoría tiene
+  muchos productos (`WithMany`) y la unión es `CategoriaId` (`HasForeignKey`).
+  `Restrict` impide borrar una categoría que todavía tiene productos.
+
+**Cómo se relacionan.**
+1. Las dos clases del modelo se apuntan entre sí con sus propiedades de
+   navegación.
+2. `AppDbContext` le dice a EF Core cómo traducir esa relación a tablas.
+3. La migración crea la columna `CategoriaId` con su clave foránea.
+4. Al consultar, `Include(p => p.Categoria)` hace que EF Core traiga también
+   la categoría de cada producto.
 
 **Qué explicar.**
 - `Restrict` evita que borrar una categoría elimine sus productos en silencio.
@@ -252,10 +464,29 @@ solapados lo romperían. Es la pregunta más probable de la defensa.
 **Estado: CUMPLE.** Hay 2 migraciones, 5 categorías y 30 productos.
 
 **Evidencia.**
-- [DatosSemilla.cs](IndumentariaEcommerce/IndumentariaEcommerce/Data/DatosSemilla.cs): `HasData`, aplicado desde [AppDbContext.cs#L56](IndumentariaEcommerce/IndumentariaEcommerce/Data/AppDbContext.cs#L56).
+- [DatosSemilla.cs](IndumentariaEcommerce/IndumentariaEcommerce/Data/DatosSemilla.cs): `HasData`, aplicado desde [AppDbContext.cs](IndumentariaEcommerce/IndumentariaEcommerce/Data/AppDbContext.cs) — línea 56.
 - [20260830215822_MigracionInicial.cs](IndumentariaEcommerce/IndumentariaEcommerce/Migrations/20260830215822_MigracionInicial.cs): tablas, clave foránea, índice y seed.
 - [20260831021009_ActualizarCatalogoConFotos.cs](IndumentariaEcommerce/IndumentariaEcommerce/Migrations/20260831021009_ActualizarCatalogoConFotos.cs): `UpdateData` del seed.
-- [Program.cs#L50](IndumentariaEcommerce/IndumentariaEcommerce/Program.cs#L50): `Database.Migrate()` al arrancar.
+- [Program.cs](IndumentariaEcommerce/IndumentariaEcommerce/Program.cs) — línea 50: `Database.Migrate()` al arrancar.
+
+**Referencias explicadas.**
+- **`DatosSemilla.cs`:** define las 5 categorías y los 30 productos iniciales
+  con `HasData`. `AppDbContext` lo invoca en la línea 56, dentro de
+  `OnModelCreating`.
+- **`MigracionInicial`:** código generado por `dotnet ef migrations add`. Crea
+  las tablas, la clave foránea, el índice por `Genero` e inserta el seed.
+- **`ActualizarCatalogoConFotos`:** segunda migración. Con `UpdateData`
+  actualiza las filas del seed cuando cambiaron nombres e imágenes.
+- **`Program.cs`, línea 50:** `Database.Migrate()` aplica las migraciones
+  pendientes. Si la base no existe, la crea.
+
+**Cómo se relacionan.**
+1. Se modifica el modelo o el seed en C#.
+2. `dotnet ef migrations add` compara ese modelo con la última migración y
+   genera una nueva con las diferencias.
+3. Las migraciones se versionan en Git; la base no.
+4. Al ejecutar la app, `Migrate()` aplica a la base las migraciones que
+   todavía no aplicó.
 
 **Comprobación realizada.** `dotnet ef migrations has-pending-model-changes`
 respondió que el modelo no tiene cambios sin migrar.
@@ -271,17 +502,54 @@ respondió que el modelo no tiene cambios sin migrar.
 
 | Operación | Método | Línea |
 |---|---|---|
-| Listar / buscar / paginar | `BuscarAsync` | [L30](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs#L30) |
-| Leer | `ObtenerPorIdAsync` | [L90](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs#L90) |
-| Crear | `CrearAsync` | [L138](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs#L138) |
-| Actualizar | `ActualizarAsync` | [L156](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs#L156) |
-| Eliminar | `EliminarAsync` | [L191](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs#L191) |
+| Listar / buscar / paginar | `BuscarAsync` | [L30](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs) |
+| Leer | `ObtenerPorIdAsync` | [L90](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs) |
+| Crear | `CrearAsync` | [L138](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs) |
+| Actualizar | `ActualizarAsync` | [L156](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs) |
+| Eliminar | `EliminarAsync` | [L191](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs) |
 
-- La búsqueda usa `EF.Functions.Like` ([L70](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs#L70)) y el total se cuenta antes de paginar ([L76](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs#L76)).
+- La búsqueda usa `EF.Functions.Like` ([línea 70](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs)) y el total se cuenta antes de paginar ([línea 76](IndumentariaEcommerce/IndumentariaEcommerce/Services/ProductoService.cs)).
 - En el panel:
-  - Formulario de búsqueda: [AdminProductos.razor#L17](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/AdminProductos.razor#L17).
-  - Paso del texto a `BuscarAsync`: [#L180](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/AdminProductos.razor#L180).
-  - Baja con `ConfirmacionEliminar`: [#L96](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/AdminProductos.razor#L96).
+  - Formulario de búsqueda: [AdminProductos.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/AdminProductos.razor) — línea 17.
+  - Paso del texto a `BuscarAsync`: [línea 180](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/AdminProductos.razor).
+  - Baja con `ConfirmacionEliminar`: [línea 96](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/AdminProductos.razor).
+
+**Referencias explicadas.**
+- **`BuscarAsync`:** arma la consulta en pasos y devuelve un
+  `ResultadoPaginado` con los productos de la página y el total.
+  - Aplica los filtros opcionales: género, categoría y texto.
+  - Cuenta el total con `CountAsync`.
+  - Recorta la página con `Skip` (saltear las anteriores) y `Take` (tomar el
+    tamaño de página).
+- **`ObtenerPorIdAsync`:** trae un producto con su categoría. Devuelve `null`
+  si no existe.
+- **`CrearAsync`:** agrega el producto con `Add` y lo guarda con
+  `SaveChangesAsync`.
+- **`ActualizarAsync`:** trae el producto **con seguimiento** (sin
+  `AsNoTracking`), copia los valores nuevos y guarda. EF Core genera el
+  `UPDATE` solo con los campos que cambiaron.
+- **`EliminarAsync`:** busca el producto, lo quita con `Remove` y guarda.
+- **`EF.Functions.Like` (línea 70):** se traduce al `LIKE '%texto%'` de SQL, es
+  decir "contiene".
+- **Línea 76:** el total se cuenta antes de `Skip`/`Take`, porque con él se
+  calcula cuántas páginas hay.
+- **`AdminProductos.razor`:**
+  - Línea 17: el `form` ejecuta `BuscarAsync` del componente al presionar Enter
+    o tocar Buscar.
+  - Línea 180: `CargarAsync` le pasa al servicio el texto aplicado y la página.
+  - Línea 96: muestra `ConfirmacionEliminar` solo en la fila que se está
+    borrando.
+
+**Cómo se relacionan.**
+1. El usuario escribe en el buscador del panel y confirma: el componente guarda
+   el texto, vuelve a la página 1 y llama a `CargarAsync`.
+2. `CargarAsync` llama a `ProductoService.BuscarAsync` con texto, página y
+   tamaño.
+3. El servicio filtra con `LIKE`, cuenta el total, recorta la página y
+   devuelve el resultado.
+4. La tabla muestra las filas y `Paginacion` recibe el total de páginas.
+5. Editar lleva a `FormularioProducto`, y Eliminar abre `ConfirmacionEliminar`,
+   que al confirmar llama a `EliminarAsync` y recarga la lista.
 
 **Qué mostrar.** En el panel, buscar `zapatillas` estando en la página 2: vuelve
 a la página 1 con los resultados. Después crear, editar y eliminar un producto.
@@ -300,16 +568,26 @@ a la página 1 con los resultados. Después crear, editar y eliminar un producto
 
 **Evidencia verificada.**
 - Repositorio público: `https://github.com/nittoluciano9-max/Indumentaria-Blazor`, rama `main`.
-- Los 33 commits del historial siguen el formato `tipo(alcance): descripción`.
+- Los 36 commits publicados siguen el formato `tipo(alcance): descripción`.
   Se usan los tipos `feat`, `fix`, `style`, `refactor`, `docs` y `chore`.
 - Las bases de datos y los artefactos de compilación están excluidos en [.gitignore](.gitignore).
 
-**Pendiente antes de entregar.** Los ajustes técnicos y la documentación
-actuales todavía **no están commiteados ni subidos**. Hay que commitearlos
-también con Conventional Commits y hacer push.
+**Estado de la publicación.** Los commits anteriores, incluidos los ajustes
+técnicos y la documentación, ya están publicados en GitHub. Las modificaciones
+actuales de esta guía todavía están pendientes de commit, que se hará también
+con Conventional Commits.
 
 **Qué mostrar.** `git log --oneline` o la pestaña Git Changes / Git Repository
 de Visual Studio.
+
+**Referencias explicadas.**
+- **Conventional Commits:** cada mensaje empieza con un tipo que dice qué clase
+  de cambio es. `feat` es una funcionalidad nueva, `fix` una corrección, `docs`
+  documentación, `style` cambios visuales, `refactor` una reorganización sin
+  cambio de comportamiento y `chore` mantenimiento. El alcance entre paréntesis
+  indica la zona afectada, por ejemplo `fix(carrito)`.
+- **`.gitignore`:** lista lo que Git no debe versionar: la base `*.db`, que se
+  regenera, y las carpetas `bin/` y `obj/`, que produce la compilación.
 
 ### 14. CI/CD con GitHub Actions
 
@@ -322,14 +600,25 @@ de Visual Studio.
 - Se dejó fuera junto con el despliegue (requisito 16), por decisión acordada
   para esta entrega.
 
+**Referencias explicadas.** GitHub Actions ejecuta los archivos `.yml` que
+estén en `.github/workflows/`. Un workflow de CI, por ejemplo, ejecutaría
+`dotnet build` en cada push para avisar si el código dejó de compilar. Como no
+hay ningún archivo en esa carpeta, GitHub no ejecuta nada.
+
 ### 15. README.md profesional
 
-**Estado: CUMPLE** (pendiente de commit).
+**Estado: CUMPLE.**
 
 [README.md](README.md) incluye descripción, tecnologías con versiones,
 características, estructura, requisitos previos, ejecución con Visual Studio y
 con `dotnet`, configuración de SQLite y limitaciones conocidas. Lo complementa
 [GUIA_TECNICA.md](GUIA_TECNICA.md).
+
+**Referencias explicadas.**
+- **`README.md`:** es la portada del repositorio en GitHub. Explica qué es el
+  proyecto y cómo ejecutarlo sin tener que leer el código.
+- **`GUIA_TECNICA.md`:** amplía cada concepto de Blazor aplicado y responde
+  las preguntas probables de la defensa.
 
 ### 16. Aplicación desplegada en URL pública
 
@@ -337,6 +626,11 @@ con `dotnet`, configuración de SQLite y limitaciones conocidas. Lo complementa
 
 No hay despliegue ni URL pública. La aplicación se ejecuta localmente
 (`https://localhost:7220`).
+
+**Referencias explicadas.** `localhost` es la propia computadora: la dirección
+solo responde en la máquina donde se ejecuta la aplicación. Publicarla
+requeriría un servidor que soporte .NET 9 y WebSockets (que Blazor Server usa
+para el circuito) y un lugar donde guardar el archivo SQLite.
 
 ---
 
@@ -350,6 +644,85 @@ No hay despliegue ni URL pública. La aplicación se ejecuta localmente
 | 4 | [IconoCarrito.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/IconoCarrito.razor) | Sin parámetros; usa `CarritoService` | NavMenu |
 | 5 | [Cargando.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/Cargando.razor) | `Texto` (opcional) | Home, Catálogo, Detalle, Admin, Formulario |
 | 6 | [ConfirmacionEliminar.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Shared/ConfirmacionEliminar.razor) | `Pregunta`, `EventCallback OnConfirmar`, `EventCallback OnCancelar` | AdminProductos |
+
+**Qué hace cada uno.**
+1. **`TarjetaProducto`:** muestra foto, datos, precio y aviso de stock de un
+   producto, y enlaza a su detalle.
+2. **`Paginacion`:** dibuja los botones de página y avisa cuál eligió el
+   usuario.
+3. **`FiltroProductos`:** reúne género, categoría y texto en un
+   `FiltrosCatalogo` y lo envía al catálogo. La búsqueda espera un instante a
+   que el usuario deje de escribir.
+4. **`IconoCarrito`:** muestra la cantidad total de artículos y se redibuja
+   con cada cambio del carrito.
+5. **`Cargando`:** mensaje de espera con texto configurable.
+6. **`ConfirmacionEliminar`:** muestra "Sí" y "No" y avisa al padre cuál se
+   eligió. El padre decide si borra.
+
+---
+
+## Glosario de términos
+
+- **Componente Razor:** archivo `.razor` que combina HTML y C#. Se usa como
+  etiqueta, por ejemplo `<Paginacion />`.
+- **`@page`:** convierte un componente en página accesible por URL.
+- **`[Parameter]`:** marca una propiedad que el componente padre puede
+  completar como atributo de la etiqueta. Es la forma de pasar datos **hacia
+  abajo**.
+- **`[EditorRequired]`:** indica que ese parámetro es obligatorio. El
+  compilador avisa si el padre no lo pasa.
+- **`EventCallback`:** parámetro por el que el hijo avisa algo al padre (datos
+  **hacia arriba**). A diferencia de un `Action` común, Blazor redibuja al
+  padre automáticamente después de ejecutarlo.
+- **`EditForm`:** formulario de Blazor asociado a un objeto modelo.
+  `OnValidSubmit` se ejecuta solo si la validación pasó.
+- **`DataAnnotationsValidator`:** activa en el `EditForm` las reglas
+  declaradas con atributos en el modelo (`Required`, `Range`, etc.).
+- **`ValidationAttribute`:** clase base para crear validaciones propias. Se
+  sobrescribe `IsValid`.
+- **`NavigationManager`:** servicio para leer la URL actual y navegar desde C#
+  con `NavigateTo`.
+- **State Service:** servicio que guarda estado compartido entre componentes,
+  como el carrito, y avisa sus cambios.
+- **`Scoped`:** una instancia por circuito, es decir por pestaña conectada.
+  **`Singleton`** sería una sola para todos los usuarios.
+- **Circuito:** la conexión permanente (SignalR) entre una pestaña del
+  navegador y el servidor en Blazor Server.
+- **`StateHasChanged`:** le indica a Blazor que el componente debe
+  redibujarse.
+- **`InvokeAsync`:** ejecuta código en el hilo de render del componente. Hace
+  falta cuando el aviso llega desde afuera, como un evento del servicio.
+- **`IDisposable` / `Dispose`:** método que Blazor llama al destruir el
+  componente. Se usa para desuscribirse de eventos.
+- **Ciclo de vida:**
+  - `OnInitializedAsync` se ejecuta una vez al crear el componente.
+  - `OnParametersSetAsync` se ejecuta cada vez que cambian sus parámetros.
+  - `OnAfterRenderAsync` se ejecuta después de dibujarlo, y es el primer
+    momento en que se puede usar JavaScript.
+- **Prerender:** primer dibujo que el servidor genera como HTML estático antes
+  de conectar el circuito. En ese momento no hay navegador disponible.
+- **`IJSRuntime`:** servicio para llamar funciones JavaScript desde C#.
+- **`localStorage`:** almacenamiento del navegador que persiste aunque se
+  cierre la pestaña.
+- **CSS Isolation:** estilos en `Componente.razor.css` que se aplican solo a
+  ese componente.
+- **`::deep`:** permite que una regla aislada alcance elementos dibujados por
+  un componente hijo.
+- **Mobile-first:** se diseña primero para celular y se agregan cambios para
+  pantallas más grandes.
+- **`DbContext`:** objeto de EF Core que representa una sesión con la base:
+  consulta y guarda cambios.
+- **`DbContextFactory`:** crea un `DbContext` nuevo cada vez que se lo pide.
+- **Migración:** clase generada que describe cómo pasar la base de un estado
+  del modelo al siguiente.
+- **Seed (`HasData`):** datos iniciales que se cargan con las migraciones.
+- **Clave foránea:** columna que guarda el Id de otra tabla, como
+  `CategoriaId`.
+- **`Include`:** pide a EF Core que traiga también una entidad relacionada.
+- **`AsNoTracking`:** consulta de solo lectura. EF Core no sigue los cambios
+  de esos objetos, lo que la hace más liviana.
+- **`Skip` / `Take`:** saltear N registros y tomar M. Así se implementa la
+  paginación.
 
 ---
 

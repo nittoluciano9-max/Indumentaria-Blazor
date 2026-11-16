@@ -179,6 +179,24 @@ Formulario:
 - EF Core también usa estos atributos: `StringLength` define el largo de las
   columnas.
 
+**Expresión regular:** `Nombre` tiene
+`[RegularExpression(@"^\S(?:.*\S)?$")]`, con el mensaje "El nombre no puede
+comenzar ni terminar con espacios."
+
+- Cómo se lee el patrón:
+  - `^` y `$` marcan el inicio y el fin del texto.
+  - `\S` es cualquier carácter que no sea un espacio en blanco.
+  - `(?:.*\S)?` es un grupo opcional, sin captura: cualquier cosa en el medio
+    seguida de un último carácter que no sea espacio.
+- Resultado: los espacios internos se permiten. "Remera negra" y "Jean
+  clásico" son válidos, " Remera negra" y "Remera negra " no.
+- Evita nombres que se ven iguales en pantalla pero son distintos al ordenar o
+  al buscar.
+- Un nombre vacío no lo rechaza la expresión regular: de eso se ocupa
+  `[Required]`, el mismo criterio de "un atributo, una regla" que en
+  `TallesValidos`.
+- EF Core ignora `RegularExpression`, así que no requiere migración.
+
 **Validación personalizada:**
 [TallesValidosAttribute.cs](IndumentariaEcommerce/IndumentariaEcommerce/Models/Validaciones/TallesValidosAttribute.cs).
 

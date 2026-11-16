@@ -14,6 +14,9 @@ public class Producto
 
     [Required(ErrorMessage = "El nombre es obligatorio.")]
     [StringLength(100, ErrorMessage = "El nombre no puede superar los 100 caracteres.")]
+    // Primer y último carácter distintos de espacio: evita " Remera" o "Remera ",
+    // que se ven iguales en pantalla pero ordenan y se buscan distinto.
+    [RegularExpression(@"^\S(?:.*\S)?$", ErrorMessage = "El nombre no puede comenzar ni terminar con espacios.")]
     public string Nombre { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "La descripción es obligatoria.")]
