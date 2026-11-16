@@ -40,7 +40,7 @@ Las líneas citadas corresponden al estado del código al 16/11/2026.
 | [16](#16-aplicación-desplegada-en-url-pública) | 4 | Aplicación desplegada en URL pública | PENDIENTE |
 
 Además: [componentes reutilizables](#componentes-razor-reutilizables) ·
-[guion de exposición](#guion-de-exposición-10-minutos).
+[recorrido de repaso](#recorrido-de-repaso-10-minutos).
 
 ---
 
@@ -56,8 +56,8 @@ más 6 páginas y 2 de layout.
 - **¿Para qué sirve?** Para escribir una parte de la interfaz una sola vez y usarla en varias pantallas.
 - **¿Cómo lo aplicamos?** Hay 6 componentes en `Components/Shared/`. Por ejemplo, `TarjetaProducto` se usa en la portada y en el catálogo, y `Paginacion` en el catálogo y en el panel.
 
-**Cómo explicarlo al profesor**
-> "Separé la interfaz en componentes chicos que reciben datos con `[Parameter]` y avisan lo que pasa con `EventCallback`. Por ejemplo, `Paginacion` no sabe si está en el catálogo o en el panel: recibe la página actual y el total, y devuelve la página elegida. Así se reutiliza sin copiar código."
+**Explicación**
+La interfaz está dividida en componentes chicos que reciben datos con `[Parameter]` y avisan lo que pasa con `EventCallback`. Por ejemplo, `Paginacion` no sabe si está en el catálogo o en el panel: recibe la página actual y el total, y devuelve la página elegida. Por eso se reutiliza sin copiar código.
 
 #### Detalle técnico
 
@@ -66,13 +66,13 @@ más 6 páginas y 2 de layout.
 y por eso se reutilizan en varias pantallas. Ver la
 [tabla de componentes](#componentes-razor-reutilizables).
 
-**Qué mostrar.** `Paginacion.razor`: recibe dos números y devuelve uno, y se usa
+**Cómo comprobarlo.** `Paginacion.razor`: recibe dos números y devuelve uno, y se usa
 igual en el catálogo
 ([Catalogo.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/Catalogo.razor))
 y en el panel
 ([AdminProductos.razor](IndumentariaEcommerce/IndumentariaEcommerce/Components/Pages/AdminProductos.razor)).
 
-**Qué explicar.** `[EditorRequired]` hace que el compilador avise si falta un
+**Puntos clave.** `[EditorRequired]` hace que el compilador avise si falta un
 parámetro obligatorio. `Cargando` reemplazó un bloque que estaba copiado en
 cinco páginas.
 
@@ -103,8 +103,8 @@ cinco páginas.
 - **¿Para qué sirve?** Para impedir que se guarden datos incorrectos y mostrarle al usuario qué corregir.
 - **¿Cómo lo aplicamos?** El alta y la edición de productos validan con atributos declarados en `Producto.cs`. Por ejemplo, `S,M,S` en Talles lo rechaza `[TallesValidos]` y " Remera" en Nombre lo rechaza la expresión regular.
 
-**Cómo explicarlo al profesor**
-> "Las reglas están declaradas una sola vez en el modelo con Data Annotations, y el `EditForm` las aplica mediante `DataAnnotationsValidator`. Además de `Required`, `StringLength` y `Range`, hice un atributo propio, `TallesValidos`, y una expresión regular para el nombre. Si algo falla, `OnValidSubmit` no se ejecuta y el producto no se guarda."
+**Explicación**
+Las reglas se declaran una sola vez en el modelo con Data Annotations, y el `EditForm` las aplica mediante `DataAnnotationsValidator`. Además de `Required`, `StringLength` y `Range`, hay un atributo propio (`TallesValidos`) y una expresión regular para el nombre. Si alguna regla falla, `OnValidSubmit` no se ejecuta y el producto no se guarda.
 
 #### Detalle técnico
 
@@ -154,10 +154,10 @@ cinco páginas.
    `ValidationMessage`, y `OnValidSubmit` **no** se ejecuta.
 5. Si todo es válido, se ejecuta `GuardarAsync`, que llama al servicio.
 
-**Qué mostrar.** En Administración → Nuevo producto, escribir `S,M,S` en Talles
+**Cómo comprobarlo.** En Administración → Nuevo producto, escribir `S,M,S` en Talles
 y tocar Guardar: aparece el error y no se guarda.
 
-**Qué explicar.**
+**Puntos clave.**
 - Sin `DataAnnotationsValidator` el formulario acepta cualquier dato.
 - El atributo personalizado no requiere migración, porque EF Core lo ignora.
 - Los talles repetidos romperían `@key` en el detalle del producto.
@@ -171,8 +171,8 @@ y tocar Guardar: aparece el error y no se guarda.
 - **¿Para qué sirve?** Para que cada producto tenga su propia URL y para redirigir al usuario después de una acción.
 - **¿Cómo lo aplicamos?** `/producto/{Id:int}` abre el detalle del producto con ese Id, y después de guardar un producto `NavigateTo` vuelve al listado del panel.
 
-**Cómo explicarlo al profesor**
-> "Uso `@page` con parámetros tipados, como `{Id:int}`, que Blazor copia a una propiedad `[Parameter]`. El formulario tiene dos rutas, una de alta y otra de edición, y decide qué hacer según llegue o no el `Id`. Al guardar redirijo con `NavigationManager.NavigateTo`."
+**Explicación**
+`@page` define rutas con parámetros tipados, como `{Id:int}`, y Blazor copia ese valor a una propiedad `[Parameter]`. El formulario tiene dos rutas, una de alta y otra de edición, y decide qué hacer según llegue o no el `Id`. Después de guardar, `NavigationManager.NavigateTo` redirige al listado.
 
 #### Detalle técnico
 
@@ -209,7 +209,7 @@ y tocar Guardar: aparece el error y no se guarda.
    había `Id`).
 4. Terminado el guardado, `NavigationManager.NavigateTo` lleva al listado.
 
-**Qué explicar.**
+**Puntos clave.**
 - La restricción `:int` hace que `/producto/abc` dé 404.
 - Se usa `OnParametersSetAsync` porque Blazor reutiliza el componente al pasar
   de `/producto/1` a `/producto/2`, y `OnInitializedAsync` no volvería a correr.
@@ -223,8 +223,8 @@ y tocar Guardar: aparece el error y no se guarda.
 - **¿Para qué sirve?** Para que varias partes de la pantalla muestren el mismo dato actualizado sin pasárselo entre sí.
 - **¿Cómo lo aplicamos?** `CarritoService` guarda el carrito. Al agregar un producto desde el detalle, el contador del menú se actualiza solo.
 
-**Cómo explicarlo al profesor**
-> "`CarritoService` está registrado como `Scoped`: una instancia por circuito, o sea un carrito por usuario. Cuando cambia dispara el evento `OnCambio`, al que están suscritos `IconoCarrito` y la página `Carrito`, que se redibujan con `InvokeAsync(StateHasChanged)`. Al destruirse se desuscriben en `Dispose`."
+**Explicación**
+`CarritoService` está registrado como `Scoped`: una instancia por circuito, es decir un carrito por usuario. Cada cambio dispara el evento `OnCambio`; `IconoCarrito` y la página `Carrito` están suscritos y se redibujan con `InvokeAsync(StateHasChanged)`. Al destruirse, se desuscriben en `Dispose`.
 
 #### Detalle técnico
 
@@ -264,11 +264,11 @@ y tocar Guardar: aparece el error y no se guarda.
    componente con los datos nuevos.
 5. Al salir de una página, `Dispose` quita la suscripción.
 
-**Qué mostrar.** Agregar un producto desde el detalle: el contador del menú se
+**Cómo comprobarlo.** Agregar un producto desde el detalle: el contador del menú se
 actualiza aunque `DetalleProducto` no conoce a `IconoCarrito`. Después, F5 en
 `/carrito`: los productos siguen ahí.
 
-**Qué explicar.**
+**Puntos clave.**
 - `Scoped` significa una instancia por circuito, es decir un carrito por
   usuario. Con `Singleton` todos compartirían el mismo carrito.
 - Desuscribirse evita que el servicio quede apuntando a componentes destruidos.
@@ -286,8 +286,8 @@ actualiza aunque `DetalleProducto` no conoce a `IconoCarrito`. Después, F5 en
 - **¿Para qué sirve?** Para mejorar la accesibilidad y dar al documento una estructura que los navegadores y lectores de pantalla entienden.
 - **¿Cómo lo aplicamos?** `MainLayout` usa `aside` para el menú, `main` para la página y `footer` para el pie. El buscador del panel es un `form role="search"`.
 
-**Cómo explicarlo al profesor**
-> "Armé el layout con etiquetas semánticas: `aside` para el menú lateral, `header` para la marca, `nav` para los enlaces, `main` para el contenido y `footer` para el pie. Las páginas agregan `section` y `nav` con `aria-label`. Uso `div` solo donde el elemento no tiene significado, como la columna que agrupa `main` y `footer`."
+**Explicación**
+El layout usa `aside` para el menú lateral, `header` para la marca, `nav` para los enlaces, `main` para el contenido y `footer` para el pie. Las páginas agregan `section` y `nav` con `aria-label`. `div` queda solo donde el elemento no tiene significado, como la columna que agrupa `main` y `footer`.
 
 #### Detalle técnico
 
@@ -318,9 +318,9 @@ pie, fuera de `main`.
 3. Cada página agrega su propia estructura (`section`, `nav`, `form`) dentro
    de `main`.
 
-**Qué mostrar.** F12 → Elements: la estructura `aside`, `main` y `footer`.
+**Cómo comprobarlo.** F12 → Elements: la estructura `aside`, `main` y `footer`.
 
-**Qué explicar.** El `div.columna` no tiene significado: solo agrupa `main` y
+**Puntos clave.** El `div.columna` no tiene significado: solo agrupa `main` y
 `footer` para mantener el diseño en escritorio.
 
 ### 6. CSS Isolation en al menos 3 componentes
@@ -333,8 +333,8 @@ de layout.
 - **¿Para qué sirve?** Para que los estilos de un componente no afecten a otros.
 - **¿Cómo lo aplicamos?** Hay 11 archivos `.razor.css`. Por ejemplo, `TarjetaProducto.razor.css` define el aspecto de la tarjeta sin tocar el resto del sitio.
 
-**Cómo explicarlo al profesor**
-> "Cada componente con estilo propio tiene su `.razor.css`. Al compilar, Blazor agrega un atributo como `b-xxxx` a los selectores y a los elementos, y junta todo en `IndumentariaEcommerce.styles.css`. Cuando necesito alcanzar un elemento de un componente hijo, como el `<a>` que dibuja `NavLink`, uso `::deep`."
+**Explicación**
+Cada componente con estilo propio tiene su `.razor.css`. Al compilar, Blazor agrega un atributo como `b-xxxx` a los selectores y a los elementos, y reúne todo en `IndumentariaEcommerce.styles.css`. Para alcanzar un elemento de un componente hijo, como el `<a>` que dibuja `NavLink`, se usa `::deep`.
 
 #### Detalle técnico
 
@@ -363,9 +363,9 @@ componente. Blazor agrega un atributo único a los elementos y los reúne en
 4. `App.razor` carga ese archivo y el navegador aplica cada regla solo a los
    elementos que tienen el atributo correspondiente.
 
-**Qué mostrar.** F12: un elemento de la tarjeta con su atributo `b-xxxxxxxx`.
+**Cómo comprobarlo.** F12: un elemento de la tarjeta con su atributo `b-xxxxxxxx`.
 
-**Qué explicar.** `::deep`
+**Puntos clave.** `::deep`
 ([NavMenu.razor.css](IndumentariaEcommerce/IndumentariaEcommerce/Components/Layout/NavMenu.razor.css) — línea 79)
 hace falta porque el `<a>` lo dibuja el componente hijo `NavLink`.
 
@@ -378,8 +378,8 @@ hace falta porque el `<a>` lo dibuja el componente hijo `NavLink`.
 - **¿Para qué sirve?** Para que la tienda se vea bien en celular, tablet y escritorio.
 - **¿Cómo lo aplicamos?** La grilla del catálogo muestra 1 tarjeta por fila en celular y hasta 4 en pantallas grandes, con las clases `row-cols-*`.
 
-**Cómo explicarlo al profesor**
-> "Las clases sin prefijo valen para celular y las de `sm`, `md`, `lg` y `xl` se suman al crecer la pantalla. El catálogo va de `row-cols-1` a `row-cols-xl-4`, la tabla del panel usa `table-responsive` y el menú lateral pasa a ser una barra desplegable en celular. Los colores se cambiaron redefiniendo las variables `--bs-*` en `app.css`."
+**Explicación**
+Las clases sin prefijo valen para celular y las de `sm`, `md`, `lg` y `xl` se suman al crecer la pantalla. El catálogo va de `row-cols-1` a `row-cols-xl-4`, la tabla del panel usa `table-responsive` y el menú lateral pasa a barra desplegable en celular. Los colores se cambian redefiniendo las variables `--bs-*` en `app.css`.
 
 #### Detalle técnico
 
@@ -410,7 +410,7 @@ queries propias usan `min-width`, que también es mobile-first.
    de la pantalla.
 4. Los `.razor.css` agregan solo lo que Bootstrap no resuelve.
 
-**Qué mostrar.** F12 → modo dispositivo: el catálogo pasa de 1 a 4 columnas y
+**Cómo comprobarlo.** F12 → modo dispositivo: el catálogo pasa de 1 a 4 columnas y
 el menú lateral se convierte en barra superior desplegable.
 
 ### 8. JS Interop
@@ -422,8 +422,8 @@ el menú lateral se convierte en barra superior desplegable.
 - **¿Para qué sirve?** Para usar funciones del navegador que C# no tiene disponibles, como `localStorage`.
 - **¿Cómo lo aplicamos?** El carrito se guarda en `localStorage` y se recupera al recargar la página con F5.
 
-**Cómo explicarlo al profesor**
-> "Hice un script, `almacenamiento.js`, con las funciones `guardar`, `leer` y `borrar` sobre `localStorage`. `CarritoService` las llama con `IJSRuntime` cada vez que cambia el carrito. La lectura se hace en `OnAfterRenderAsync` del primer render, porque durante el prerender todavía no hay navegador."
+**Explicación**
+`almacenamiento.js` define `guardar`, `leer` y `borrar` sobre `localStorage`, y `CarritoService` las llama con `IJSRuntime` cada vez que cambia el carrito. La lectura ocurre en `OnAfterRenderAsync` del primer render, porque durante el prerender todavía no hay navegador.
 
 #### Detalle técnico
 
@@ -460,9 +460,9 @@ mediante un módulo JavaScript propio, invocado desde C# con `IJSRuntime`.
 4. Cada vez que el carrito cambia, el servicio llama a `almacenamiento.guardar`.
 5. Después de un F5 se repite el paso 2 y el carrito se recupera.
 
-**Qué mostrar.** F12 → Application → Local Storage → clave `carrito`.
+**Cómo comprobarlo.** F12 → Application → Local Storage → clave `carrito`.
 
-**Qué explicar.** JS solo se puede llamar después del primer render, porque
+**Puntos clave.** JS solo se puede llamar después del primer render, porque
 durante el prerender no hay navegador.
 
 ---
@@ -478,8 +478,8 @@ durante el prerender no hay navegador.
 - **¿Para qué sirve?** Para acceder a la base SQLite sin escribir SQL a mano y de forma segura en Blazor Server.
 - **¿Cómo lo aplicamos?** `ProductoService` crea un contexto corto para cada operación, por ejemplo al buscar los productos del catálogo.
 
-**Cómo explicarlo al profesor**
-> "Registré `AddDbContextFactory` con `UseSqlite` en lugar de `AddDbContext`. En Blazor Server un `DbContext` scoped viviría todo el circuito y no es thread-safe, así que dos eventos simultáneos podrían romperlo. Con la fábrica, cada método del servicio abre un contexto, consulta y lo libera con `await using`."
+**Explicación**
+Se registra `AddDbContextFactory` con `UseSqlite` en lugar de `AddDbContext`. En Blazor Server un `DbContext` scoped viviría todo el circuito y no es thread-safe, así que dos eventos simultáneos podrían romperlo. Con la fábrica, cada método del servicio abre un contexto, consulta y lo libera con `await using`.
 
 #### Detalle técnico
 
@@ -513,9 +513,9 @@ durante el prerender no hay navegador.
 4. Así cada operación usa un contexto propio y dos eventos simultáneos nunca
    comparten el mismo.
 
-**Qué explicar.** En Blazor Server un `DbContext` *scoped* viviría todo el
+**Puntos clave.** En Blazor Server un `DbContext` *scoped* viviría todo el
 circuito, durante minutos u horas. Además no es thread-safe: dos eventos
-solapados lo romperían. Es la pregunta más probable de la defensa.
+solapados lo romperían. Es uno de los puntos clave del proyecto.
 
 ### 10. Al menos 2 entidades relacionadas
 
@@ -526,8 +526,8 @@ solapados lo romperían. Es la pregunta más probable de la defensa.
 - **¿Para qué sirve?** Para representar que cada producto pertenece a una categoría.
 - **¿Cómo lo aplicamos?** Una `Categoria` tiene muchos `Producto`, y cada producto guarda su `CategoriaId`. Por ejemplo, una remera pertenece a la categoría Remeras.
 
-**Cómo explicarlo al profesor**
-> "`Producto` tiene `CategoriaId` como clave foránea y `Categoria` como navegación, y `Categoria` tiene la colección `Productos`. En `AppDbContext` configuré la relación con `HasOne`, `WithMany` y `HasForeignKey`, y `OnDelete(Restrict)` para que borrar una categoría no borre sus productos. Al consultar uso `Include` para traer la categoría."
+**Explicación**
+`Producto` tiene `CategoriaId` como clave foránea y `Categoria` como navegación; `Categoria` tiene la colección `Productos`. `AppDbContext` configura la relación con `HasOne`, `WithMany` y `HasForeignKey`, y con `OnDelete(Restrict)` para que borrar una categoría no borre sus productos. Las consultas usan `Include` para traer la categoría.
 
 #### Detalle técnico
 
@@ -555,7 +555,7 @@ solapados lo romperían. Es la pregunta más probable de la defensa.
 4. Al consultar, `Include(p => p.Categoria)` hace que EF Core traiga también
    la categoría de cada producto.
 
-**Qué explicar.**
+**Puntos clave.**
 - `Restrict` evita que borrar una categoría elimine sus productos en silencio.
 - `Include(p => p.Categoria)` carga la relación en las consultas.
 
@@ -568,8 +568,8 @@ solapados lo romperían. Es la pregunta más probable de la defensa.
 - **¿Para qué sirve?** Para que cualquiera que clone el repositorio obtenga la misma base, con datos de prueba.
 - **¿Cómo lo aplicamos?** Dos migraciones crean las tablas y cargan 5 categorías y 30 productos, y la aplicación las aplica sola al arrancar.
 
-**Cómo explicarlo al profesor**
-> "Los datos iniciales están en `DatosSemilla` con `HasData`. Las migraciones se generan con `dotnet ef migrations add` y se versionan en Git; la base no. Al arrancar, `Database.Migrate()` crea la base si no existe y aplica las migraciones pendientes."
+**Explicación**
+Los datos iniciales están en `DatosSemilla`, con `HasData`. Las migraciones se generan con `dotnet ef migrations add` y se versionan en Git; la base no. Al arrancar, `Database.Migrate()` crea la base si no existe y aplica las migraciones pendientes.
 
 #### Detalle técnico
 
@@ -601,7 +601,7 @@ solapados lo romperían. Es la pregunta más probable de la defensa.
 **Comprobación realizada.** `dotnet ef migrations has-pending-model-changes`
 respondió que el modelo no tiene cambios sin migrar.
 
-**Qué explicar.** La base (`*.db`) no se versiona
+**Puntos clave.** La base (`*.db`) no se versiona
 ([.gitignore](.gitignore)): cada clon la regenera desde las migraciones.
 
 ### 12. CRUD completo con paginación y búsqueda
@@ -613,8 +613,8 @@ respondió que el modelo no tiene cambios sin migrar.
 - **¿Para qué sirve?** Para administrar el catálogo completo desde la aplicación sin que los listados se vuelvan lentos o interminables.
 - **¿Cómo lo aplicamos?** El panel lista los productos de a 10, busca por nombre y permite alta, edición y baja con confirmación.
 
-**Cómo explicarlo al profesor**
-> "`ProductoService` tiene un método por operación: `BuscarAsync`, `ObtenerPorIdAsync`, `CrearAsync`, `ActualizarAsync` y `EliminarAsync`. La búsqueda usa `EF.Functions.Like` y la paginación `Skip` y `Take`, contando el total antes de recortar. Al cambiar el texto de búsqueda se vuelve a la página 1."
+**Explicación**
+`ProductoService` tiene un método por operación: `BuscarAsync`, `ObtenerPorIdAsync`, `CrearAsync`, `ActualizarAsync` y `EliminarAsync`. La búsqueda usa `EF.Functions.Like` y la paginación `Skip` y `Take`, contando el total antes de recortar. Al cambiar el texto de búsqueda se vuelve a la página 1.
 
 #### Detalle técnico
 
@@ -671,10 +671,10 @@ respondió que el modelo no tiene cambios sin migrar.
 5. Editar lleva a `FormularioProducto`, y Eliminar abre `ConfirmacionEliminar`,
    que al confirmar llama a `EliminarAsync` y recarga la lista.
 
-**Qué mostrar.** En el panel, buscar `zapatillas` estando en la página 2: vuelve
+**Cómo comprobarlo.** En el panel, buscar `zapatillas` estando en la página 2: vuelve
 a la página 1 con los resultados. Después crear, editar y eliminar un producto.
 
-**Qué explicar.**
+**Puntos clave.**
 - Contar después de `Skip`/`Take` daría siempre una sola página.
 - Al cambiar el criterio de búsqueda se vuelve a la página 1.
 
@@ -691,8 +691,8 @@ a la página 1 con los resultados. Después crear, editar y eliminar un producto
 - **¿Para qué sirve?** Para que el historial se entienda y se pueda ver qué cambió y por qué.
 - **¿Cómo lo aplicamos?** El repositorio es público en GitHub y cada commit sigue el formato, por ejemplo `feat(validaciones): agregar expresion regular y actualizar documentacion`.
 
-**Cómo explicarlo al profesor**
-> "Cada commit es una unidad de trabajo con un mensaje `tipo(alcance): descripción`, en español y en imperativo. Uso `feat` para funcionalidades, `fix` para correcciones y `docs`, `style`, `refactor` y `chore` para el resto. El `.gitignore` deja afuera la base de datos y los archivos de compilación."
+**Explicación**
+Cada commit es una unidad de trabajo con un mensaje `tipo(alcance): descripción`, en español y en imperativo. `feat` marca funcionalidades, `fix` correcciones, y `docs`, `style`, `refactor` y `chore` el resto. El `.gitignore` deja afuera la base de datos y los archivos de compilación.
 
 #### Detalle técnico
 
@@ -706,7 +706,7 @@ a la página 1 con los resultados. Después crear, editar y eliminar un producto
 rama `main`: el código, los ajustes técnicos, la validación con expresión
 regular y la documentación, incluida esta guía.
 
-**Qué mostrar.** `git log --oneline` o la pestaña Git Changes / Git Repository
+**Cómo comprobarlo.** `git log --oneline` o la pestaña Git Changes / Git Repository
 de Visual Studio.
 
 **Referencias explicadas.**
@@ -727,8 +727,8 @@ de Visual Studio.
 - **¿Para qué sirve?** Para detectar errores apenas se sube el código y publicar sin pasos manuales.
 - **¿Cómo lo aplicamos?** No está implementado en esta entrega. Un workflow en `.github/workflows/` ejecutaría `dotnet build` en cada push.
 
-**Cómo explicarlo al profesor**
-> "CI/CD quedó fuera del alcance acordado para esta entrega, junto con el despliegue. Para implementarlo agregaría un archivo YAML en `.github/workflows/` que, en cada push, restaure las dependencias, compile y, cuando haya pruebas, las ejecute. La parte de repositorio e historial con Conventional Commits sí está cumplida."
+**Explicación**
+CI/CD quedó fuera del alcance de esta entrega, junto con el despliegue. Implementarlo requiere un archivo YAML en `.github/workflows/` que, en cada push, restaure las dependencias, compile y, cuando haya pruebas, las ejecute. La parte de repositorio e historial con Conventional Commits sí está cumplida.
 
 #### Detalle técnico
 
@@ -753,8 +753,8 @@ hay ningún archivo en esa carpeta, GitHub no ejecuta nada.
 - **¿Para qué sirve?** Para que cualquiera entienda y ejecute el proyecto sin leer el código.
 - **¿Cómo lo aplicamos?** `README.md` describe la tienda, las tecnologías, la estructura, cómo ejecutarla con Visual Studio o `dotnet` y las limitaciones conocidas.
 
-**Cómo explicarlo al profesor**
-> "El README explica qué es el proyecto, con qué tecnologías y versiones está hecho y cómo ejecutarlo desde Visual Studio o la línea de comandos. También documenta la base SQLite y las limitaciones conocidas. Para el detalle técnico remite a `GUIA_TECNICA.md`."
+**Explicación**
+El README explica qué es el proyecto, con qué tecnologías y versiones está hecho y cómo ejecutarlo desde Visual Studio o la línea de comandos. También documenta la base SQLite y las limitaciones conocidas. Para el detalle técnico remite a `GUIA_TECNICA.md`.
 
 #### Detalle técnico
 
@@ -767,19 +767,19 @@ con `dotnet`, configuración de SQLite y limitaciones conocidas. Lo complementa
 - **`README.md`:** es la portada del repositorio en GitHub. Explica qué es el
   proyecto y cómo ejecutarlo sin tener que leer el código.
 - **`GUIA_TECNICA.md`:** amplía cada concepto de Blazor aplicado y responde
-  las preguntas probables de la defensa.
+  las preguntas clave de repaso.
 
 ### 16. Aplicación desplegada en URL pública
 
-**Estado: PENDIENTE — excluido por el docente para esta entrega.**
+**Estado: PENDIENTE — fuera del alcance de esta entrega.**
 
 **Resumen conceptual**
 - **¿Qué es?** Es publicar la aplicación en un servidor accesible desde internet, con una URL pública.
 - **¿Para qué sirve?** Para que cualquiera pueda usarla sin instalar nada.
 - **¿Cómo lo aplicamos?** No se desplegó en esta entrega: la aplicación se ejecuta localmente en `https://localhost:7220`.
 
-**Cómo explicarlo al profesor**
-> "El despliegue quedó fuera del alcance de esta entrega. Para publicarla necesitaría un hosting compatible con .NET 9 y con WebSockets, porque Blazor Server mantiene un circuito por SignalR, y resolver dónde se guarda el archivo SQLite. Localmente funciona completa."
+**Explicación**
+El despliegue quedó fuera del alcance de esta entrega. Publicar la aplicación requiere un hosting compatible con .NET 9 y con WebSockets, porque Blazor Server mantiene un circuito por SignalR, y definir dónde se guarda el archivo SQLite. Localmente funciona completa.
 
 #### Detalle técnico
 
@@ -885,20 +885,20 @@ para el circuito) y un lugar donde guardar el archivo SQLite.
 
 ---
 
-## Guion de exposición (10 minutos)
+## Recorrido de repaso (10 minutos)
 
 | Tiempo | Tema | Qué hacer |
 |---|---|---|
-| 0:00–1:00 | Presentación | Qué es la tienda y su alcance: sin login, sin pagos, sin pedidos. Stack: Blazor Server .NET 9, EF Core y SQLite. |
+| 0:00–1:00 | Introducción | Qué es la tienda y su alcance: sin login, sin pagos, sin pedidos. Stack: Blazor Server .NET 9, EF Core y SQLite. |
 | 1:00–2:00 | Arquitectura | En el Explorador de soluciones: `Models`, `Data`, `Services`, `Components`. Regla: los componentes no tocan la base. Mostrar los registros en `Program.cs`. |
 | 2:00–3:30 | Persistencia (req. 9–11) | `AppDbContext`: relación con `Restrict`. Explicar **por qué `DbContextFactory`**. Mostrar `DatosSemilla` y la carpeta `Migrations`. |
 | 3:30–5:00 | Catálogo en vivo (req. 1, 3, 7, 12) | Filtrar por género y categoría, buscar y paginar. Abrir un producto (`/producto/{Id:int}`). Achicar la ventana para mostrar el diseño responsive. |
 | 5:00–6:30 | Carrito (req. 4, 8) | Elegir talle y agregar: el contador se actualiza solo. Cambiar cantidades en `/carrito`, presionar F5 y mostrar Local Storage. En código: `OnCambio`, `InvokeAsync(StateHasChanged)` y `Dispose`. |
 | 6:30–8:00 | Administración (req. 2, 12) | Buscar, editar y probar `S,M,S` para mostrar la validación personalizada. Crear y eliminar con confirmación. Mostrar `TallesValidosAttribute`. |
 | 8:00–9:00 | Interfaz (req. 5, 6) | F12: `aside`, `main` y `footer`, y el atributo `b-xxxx` del CSS aislado. Mostrar un `.razor.css` y la tabla de los 6 componentes reutilizables. |
-| 9:00–10:00 | Unidad 4 y cierre | `git log` con Conventional Commits y el README. Aclarar que CI/CD y el deploy quedaron fuera de esta entrega. Mencionar limitaciones: 8 fotos faltantes, búsqueda sensible a acentos, sin tests. |
+| 9:00–10:00 | Unidad 4 y cierre | `git log` con Conventional Commits y el README. Repasar que CI/CD y el deploy quedaron fuera de esta entrega, y las limitaciones: 8 fotos faltantes, búsqueda sensible a acentos, sin tests. |
 
-**Preguntas probables:**
+**Preguntas clave:**
 - ¿Por qué `Scoped` y no `Singleton` para el carrito?
 - ¿Por qué `DbContextFactory`?
 - ¿Por qué `OnParametersSetAsync` en el detalle?
