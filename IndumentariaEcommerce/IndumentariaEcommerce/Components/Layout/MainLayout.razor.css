@@ -4,16 +4,16 @@
     flex-direction: column;
 }
 
-/* Columna de contenido: article se estira para que el pie quede abajo
+/* Columna de contenido: main se estira para que el pie quede abajo
    incluso en páginas cortas, en lugar de flotar a media pantalla. */
-main {
+.columna {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-width: 0;
 }
 
-article {
+main {
     flex: 1;
 }
 
@@ -35,7 +35,7 @@ article {
         top: 0;
     }
 
-    article {
+    main {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
     }

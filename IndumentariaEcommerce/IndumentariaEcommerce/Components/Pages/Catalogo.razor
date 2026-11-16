@@ -13,10 +13,7 @@
 {
     <!-- Blazor dibuja el componente ANTES de que OnInitializedAsync termine,
          así que en el primer render "resultado" todavía es null. -->
-    <div class="d-flex align-items-center gap-2 text-muted">
-        <div class="spinner-border spinner-border-sm" role="status"></div>
-        <span>Cargando productos...</span>
-    </div>
+    <Cargando Texto="Cargando productos..." />
 }
 else if (resultado.Items.Count == 0)
 {

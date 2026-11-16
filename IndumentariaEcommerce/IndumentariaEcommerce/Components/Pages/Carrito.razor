@@ -1,11 +1,12 @@
 @* Página del carrito.
-   No se suscribe al evento OnCambio del servicio, a diferencia de
-   IconoCarrito: acá los cambios los origina esta misma página, y Blazor
-   redibuja solo cuando termina un manejador de @onclick. Suscribirse sería
-   código que no agrega nada. *@
+   Se suscribe al evento OnCambio del servicio, igual que IconoCarrito: la
+   rehidratación desde localStorage la dispara IconoCarrito después del
+   primer render, y sin suscripción esta página no se enteraba (al recargar
+   con F5 mostraba el carrito vacío aunque el contador tuviera productos). *@
 
 @page "/carrito"
 @inject CarritoService ServicioCarrito
+@implements IDisposable
 
 <PageTitle>Carrito - Indumentaria</PageTitle>
 
@@ -125,6 +126,24 @@ else
 }
 
 @code {
+    protected override void OnInitialized()
+    {
+        // Corre antes del primer render, así que la suscripción ya existe
+        // cuando IconoCarrito rehidrata el carrito en su OnAfterRenderAsync.
+        ServicioCarrito.OnCambio += AlCambiarElCarrito;
+    }
+
+    // InvokeAsync porque el evento llega desde otro componente, fuera del
+    // contexto de render de esta página.
+    private void AlCambiarElCarrito() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        // El servicio vive todo el circuito y la página no: sin esto quedaría
+        // referenciando un componente ya destruido.
+        ServicioCarrito.OnCambio -= AlCambiarElCarrito;
+    }
+
     /// <summary>
     /// Una cantidad de cero o menos equivale a quitar el item: de eso ya se
     /// encarga el servicio, acá solo se le pasa el número.

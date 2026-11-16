@@ -1,0 +1,17 @@
+@* Indicador de carga mientras llega una consulta. Antes estaba copiado en
+   cinco páginas; extraído, el marcado vive en un solo lugar y cada página
+   solo elige el texto. *@
+
+<div class="d-flex align-items-center gap-2 text-muted">
+    <div class="spinner-border spinner-border-sm" role="status"></div>
+    <span>@Texto</span>
+</div>
+
+@code {
+    /// <summary>
+    /// Texto junto al spinner. Tiene valor por defecto, por eso no lleva
+    /// EditorRequired: &lt;Cargando /&gt; sin parámetros ya funciona.
+    /// </summary>
+    [Parameter]
+    public string Texto { get; set; } = "Cargando...";
+}

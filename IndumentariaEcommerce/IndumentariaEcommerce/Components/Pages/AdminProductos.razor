@@ -12,6 +12,18 @@
     <a href="/admin/productos/nuevo" class="btn btn-primary">Nuevo producto</a>
 </div>
 
+@* Búsqueda con botón (o Enter) en lugar de buscar en cada tecla: en una
+   tabla de administración alcanza, y evita tener que hacer debounce. *@
+<form class="d-flex gap-2 mb-4" role="search" @onsubmit="BuscarAsync">
+    <label class="visually-hidden" for="busqueda">Buscar por nombre</label>
+    <input id="busqueda"
+           type="search"
+           class="form-control"
+           placeholder="Buscar por nombre"
+           @bind="busqueda" />
+    <button type="submit" class="btn btn-outline-secondary">Buscar</button>
+</form>
+
 @if (mensaje is not null)
 {
     <div class="alert alert-success alert-dismissible d-flex justify-content-between">
@@ -23,14 +35,15 @@
 
 @if (resultado is null)
 {
-    <div class="d-flex align-items-center gap-2 text-muted">
-        <div class="spinner-border spinner-border-sm" role="status"></div>
-        <span>Cargando productos...</span>
-    </div>
+    <Cargando Texto="Cargando productos..." />
 }
 else if (resultado.Items.Count == 0)
 {
-    <div class="alert alert-info">No hay productos cargados.</div>
+    <div class="alert alert-info">
+        @(string.IsNullOrWhiteSpace(busquedaAplicada)
+            ? "No hay productos cargados."
+            : $"No se encontraron productos que contengan \"{busquedaAplicada}\".")
+    </div>
 }
 else
 {
@@ -80,15 +93,8 @@ else
                                estado que hace falta es un int? *@
                             @if (idAEliminar == producto.Id)
                             {
-                                <span class="small text-danger me-2">¿Eliminar?</span>
-                                <button type="button" class="btn btn-sm btn-danger"
-                                        @onclick="() => EliminarAsync(producto)">
-                                    Sí
-                                </button>
-                                <button type="button" class="btn btn-sm btn-secondary"
-                                        @onclick="() => idAEliminar = null">
-                                    No
-                                </button>
+                                <ConfirmacionEliminar OnConfirmar="() => EliminarAsync(producto)"
+                                                      OnCancelar="() => idAEliminar = null" />
                             }
                             else
                             {
@@ -122,7 +128,25 @@ else
     private int? idAEliminar;
     private string? mensaje;
 
+    // Dos variables a propósito: "busqueda" es lo que hay escrito en el campo
+    // y "busquedaAplicada" lo que se buscó al apretar Buscar. Si el usuario
+    // tipea sin buscar y cambia de página, se pagina sobre la búsqueda vigente.
+    private string? busqueda;
+    private string? busquedaAplicada;
+
     protected override Task OnInitializedAsync() => CargarAsync();
+
+    private Task BuscarAsync()
+    {
+        busquedaAplicada = busqueda;
+
+        // Mismo motivo que en el catálogo: con otro criterio, la página en la
+        // que estaba el usuario puede no existir en el nuevo resultado.
+        pagina = 1;
+        idAEliminar = null;
+
+        return CargarAsync();
+    }
 
     private Task IrAPaginaAsync(int nuevaPagina)
     {
@@ -153,6 +177,7 @@ else
     private async Task CargarAsync()
     {
         resultado = await ProductoService.BuscarAsync(
+            textoBusqueda: busquedaAplicada,
             pagina: pagina,
             tamanioPagina: FilasPorPagina);
     }

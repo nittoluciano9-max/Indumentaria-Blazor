@@ -1,0 +1,27 @@
+@* Confirmación de baja: pregunta y botones Sí / No.
+   No sabe qué se está eliminando ni cómo: solo avisa la respuesta del
+   usuario al componente padre mediante dos EventCallback. Mostrarla u
+   ocultarla también es decisión del padre. *@
+
+<span class="small text-danger me-2">@Pregunta</span>
+<button type="button" class="btn btn-sm btn-danger" @onclick="OnConfirmar">
+    Sí
+</button>
+<button type="button" class="btn btn-sm btn-secondary" @onclick="OnCancelar">
+    No
+</button>
+
+@code {
+    [Parameter]
+    public string Pregunta { get; set; } = "¿Eliminar?";
+
+    /// <summary>
+    /// EventCallback y no Action: Blazor redibuja al padre automáticamente
+    /// cuando el callback termina, sin que el padre llame a StateHasChanged.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public EventCallback OnConfirmar { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback OnCancelar { get; set; }
+}

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using IndumentariaEcommerce.Models.Validaciones;
 
 namespace IndumentariaEcommerce.Models;
 
@@ -37,6 +38,7 @@ public class Producto
     // Se guarda como texto para no agregar una tabla que la consigna no pide.
     [Required(ErrorMessage = "Debe indicar al menos un talle.")]
     [StringLength(50)]
+    [TallesValidos]
     public string Talles { get; set; } = string.Empty;
 
     public Genero Genero { get; set; }

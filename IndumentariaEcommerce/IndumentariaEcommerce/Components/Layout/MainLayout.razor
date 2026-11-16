@@ -1,14 +1,19 @@
 ﻿@inherits LayoutComponentBase
 
+@* Estructura semántica: aside para la navegación lateral, main para el
+   contenido propio de cada página y footer como pie del sitio, fuera de main
+   porque no forma parte del contenido de la página.
+   El div "columna" no tiene significado: solo agrupa main y footer para que,
+   en escritorio, queden en una misma columna a la derecha del menú. *@
 <div class="page">
-    <div class="sidebar">
+    <aside class="sidebar">
         <NavMenu />
-    </div>
+    </aside>
 
-    <main>
-        <article class="content px-4">
+    <div class="columna">
+        <main class="content px-4">
             @Body
-        </article>
+        </main>
 
         @* Solo se enlazan rutas que existen. Nada de secciones inventadas. *@
         <footer class="pie">
@@ -32,7 +37,7 @@
                 <span>Proyecto integrador · Blazor Server · .NET 9</span>
             </div>
         </footer>
-    </main>
+    </div>
 </div>
 
 @* Cartel que Blazor muestra si se corta el circuito o se produce un error
